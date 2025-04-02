@@ -10,19 +10,29 @@ namespace SimpleSPA
     {
         static void Main(string[] args)
         {
-            // Przykładowy kod w języku SIMPLE
-            string sourceCode = @"
-procedure Example {
-    x = 5;
-    while x {
-        x = x + 1;
-    }
-}
-";
+            string simpleSourceCode = String.Empty;
+            // Loding simple code from source file
+            string fileName = args.Length > 0 ? args[0] : "SimpleExample.txt";
+            if (File.Exists(fileName))
+            {
+                try
+                {
+                    simpleSourceCode = File.ReadAllText(fileName);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Load file error: {ex.Message}");
+                }
+            }
+            else
+            {
+                Console.WriteLine($"File does not exist.");
+                return;
+            }
 
             // 1. Tworzymy obiekt Lexer i wyciągamy tokeny
-            var lexer = new Lexer(sourceCode);
-            List<Token> tokens = lexer.GetTokens(sourceCode);
+            var lexer = new Lexer(simpleSourceCode);
+            List<Token> tokens = lexer.GetTokens(simpleSourceCode);
 
             Console.WriteLine("== TOKENS ==");
             foreach (var token in tokens)
