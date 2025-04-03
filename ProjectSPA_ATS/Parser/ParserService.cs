@@ -1,21 +1,30 @@
 ﻿using ProjectSPA_ATS.AST;
-using ProjectSPA_ATS.Lexer;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using ProjectSPA_ATS.LexicalAnalysis;
+using ProjectSPA_ATS.PKB;
 
 namespace ProjectSPA_ATS.Parser
 {
-    public class Parser
+    public class ParserService
     {
+        private static ParserService? _instance;
+        private readonly IPBKService _PBKService;
+
+        private ParserService(IPBKService PKBService)
+        {
+            _PBKService = PKBService;
+        }
+
+        public static ParserService GetInstance(IPBKService pbkService)
+        {
+            return _instance ??= new ParserService(pbkService);
+        }
+
         private List<Token> tokens;
         private int position = 0;
         private Token CurrentToken => tokens[position];
 
         // Konstruktor przyjmujący listę tokenów
-        public Parser(List<Token> tokens)
+        public void initTokens(List<Token> tokens) 
         {
             this.tokens = tokens;
         }
@@ -31,15 +40,33 @@ namespace ProjectSPA_ATS.Parser
             position++;
             return token;
         }
+        public bool ParseProgram(string sourceCode)
+        {
+            var lexer = new Lexer(sourceCode);
+            List<Token> tokens = lexer.GetTokens(sourceCode);
+            Console.WriteLine("== TOKENS ==");
+            foreach (var token in tokens)
+            {
+                Console.WriteLine(token);
+            }
+
+            // 2. Parsujemy listę tokenów, otrzymujemy obiekt AST
+            initTokens(tokens);
+            ProcedureNode root = ParseProcedure();
+            _PBKService.AddProcedure(root);
+            return true;
+        }
 
         public ProcedureNode ParseProcedure()
         {
+
             Eat(TokenType.Procedure);                     // spodziewamy się 'procedure'
             Token nameToken = Eat(TokenType.Identifier);  // nazwa procedury
             string procName = nameToken.Value;
             Eat(TokenType.LBrace);                       // '{'
             List<StatementNode> stmtList = ParseStmtList();
             Eat(TokenType.RBrace);                       // '}'
+
             return new ProcedureNode(procName, stmtList);
         }
 
@@ -120,8 +147,5 @@ namespace ProjectSPA_ATS.Parser
             }
             throw new Exception($"Nieoczekiwany token w wyrażeniu: {CurrentToken.Type}");
         }
-
     }
-
-
 }
