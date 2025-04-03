@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using ProjectSPA_ATS.AST;
-
+using ProjectSPA_ATS.PQL;
 using ProjectSPA_ATS.Parser;
 using ProjectSPA_ATS.PKB;
 
@@ -14,6 +14,7 @@ namespace SimpleSPA
             /// Services
             PKBService _PKBService = PKBService.Instance;
             ParserService _ParserService = ParserService.GetInstance(_PKBService);
+            PQLService _PQLService = PQLService.GetInstance(_PKBService);
 
             // Loding simple code from source file
             string simpleSourceCode = String.Empty;
@@ -42,7 +43,7 @@ namespace SimpleSPA
             PrintAst(root);
 
             /// PQL
-            /// 
+            _PQLService.StartListening();
         }
 
         /// <summary>

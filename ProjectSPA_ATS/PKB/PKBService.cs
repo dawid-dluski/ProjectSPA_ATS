@@ -3,7 +3,7 @@ using ProjectSPA_ATS.Exceptions;
 
 namespace ProjectSPA_ATS.PKB
 {
-    sealed class PKBService : IPBKService
+    sealed public class PKBService : IPBKService
     {
         private static readonly PKBService _instance = new PKBService();
         private PKBService() { }

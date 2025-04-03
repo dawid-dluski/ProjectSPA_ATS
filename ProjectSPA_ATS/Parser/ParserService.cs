@@ -4,7 +4,7 @@ using ProjectSPA_ATS.PKB;
 
 namespace ProjectSPA_ATS.Parser
 {
-    public class ParserService
+    sealed public class ParserService
     {
         private static ParserService? _instance;
         private readonly IPBKService _PBKService;
