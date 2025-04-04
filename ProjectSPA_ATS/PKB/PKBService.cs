@@ -16,7 +16,7 @@ namespace ProjectSPA_ATS.PKB
         private List<Use> UseList;
         private List<Follow> FollowList;
         private List<Parent> ParentList;
-        private List<Variable> VariableList;
+        //private List<Variable> VariableList;
 
         public void AddProcedure(ProcedureNode proc) {
 
