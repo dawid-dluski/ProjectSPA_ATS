@@ -1,4 +1,4 @@
-﻿using ProjectSPA_ATS.AST;
+﻿using ProjectSPA_ATS.Structures.AST;
 
 namespace ProjectSPA_ATS.PKB
 {

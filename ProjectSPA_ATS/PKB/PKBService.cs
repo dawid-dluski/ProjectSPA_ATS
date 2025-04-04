@@ -1,5 +1,6 @@
-﻿using ProjectSPA_ATS.AST;
-using ProjectSPA_ATS.Exceptions;
+﻿using ProjectSPA_ATS.Exceptions;
+using ProjectSPA_ATS.Structures;
+using ProjectSPA_ATS.Structures.AST;
 
 namespace ProjectSPA_ATS.PKB
 {
@@ -10,14 +11,12 @@ namespace ProjectSPA_ATS.PKB
 
         public static PKBService Instance => _instance;
         
-
         private List<ProcedureNode> ProcedureList = new List<ProcedureNode>();
-        //private List<Calls> CallsList;
-        //private List<Modifies> ModifiesList;
-        //private List<Uses> UsesList;
-        //private List<Follows> FollowsList;
-        //private List<Parent> ParentList;
-        //private List<Variable> VariableList;
+        private List<Modifie> ModifieList;
+        private List<Use> UseList;
+        private List<Follow> FollowList;
+        private List<Parent> ParentList;
+        private List<Variable> VariableList;
 
         public void AddProcedure(ProcedureNode proc) {
 
