@@ -1,0 +1,65 @@
+﻿# Pliki i katalogi kompilacji
+bin/
+obj/
+out/
+*.exe
+*.dll
+*.pdb
+*.appsettings.json
+*.log
+
+# Pliki IDE (Visual Studio)
+.vs/
+.vscode/
+.idea/
+# Pliki ustawień użytkownika Visual Studio
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+# Pliki tymczasowe
+*.tmp
+*.bak
+
+# Pliki zależności
+packages/
+node_modules/
+wwwroot/lib/
+
+# Pliki testowe
+TestResults/
+coverage/
+
+# Pliki konfiguracji środowiska
+appsettings.Development.json
+appsettings.Production.json
+appsettings.Staging.json
+secrets.json
+
+# Pliki kompilacji dla .NET SDK
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Pliki generowane przez narzędzia .NET
+*.xproj
+*.vspscc
+.vsconfig
+
+# Pliki cache NuGet
+.nuget/
+# Paczki NuGet
+*.nupkg
+
+# Pamięć podręczna narzędzi
+.idea/
+# Cache Rider (Jeśli używasz JetBrains Rider)
+.idea/
+
+# Pliki generowane przez kontenery Docker (jeśli używasz Docker)
+docker-compose.override.yml
+.docker/
+
+# Pliki specyficzne dla systemu operacyjnego
+Thumbs.db
+Desktop.ini

@@ -4,7 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ProjectSPA_ATS.AST
+namespace ProjectSPA_ATS.Structures
 {
-    public abstract class ExpressionNode : AstNode { }
+    class Use
+    {
+    }
 }

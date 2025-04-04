@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using ProjectSPA_ATS.AST;
-using ProjectSPA_ATS.Lexer;
+using ProjectSPA_ATS.PQL;
 using ProjectSPA_ATS.Parser;
+using ProjectSPA_ATS.PKB;
+using ProjectSPA_ATS.Structures.AST;
+using ProjectSPA_ATS.Helpers;
 
 namespace SimpleSPA
 {
@@ -10,33 +12,22 @@ namespace SimpleSPA
     {
         static void Main(string[] args)
         {
-            // Przykładowy kod w języku SIMPLE
-            string sourceCode = @"
-procedure Example {
-    x = 5;
-    while x {
-        x = x + 1;
-    }
-}
-";
+            /// Services
+            PKBService _PKBService = PKBService.Instance;
+            ParserService _ParserService = ParserService.GetInstance(_PKBService);
+            PQLService _PQLService = PQLService.GetInstance(_PKBService);
 
-            // 1. Tworzymy obiekt Lexer i wyciągamy tokeny
-            var lexer = new Lexer(sourceCode);
-            List<Token> tokens = lexer.GetTokens(sourceCode);
+            /// Loding simple code from source file
+            string simpleSourceCode = FileHelper.LoadFileContent(args);
 
-            Console.WriteLine("== TOKENS ==");
-            foreach (var token in tokens)
-            {
-                Console.WriteLine(token);
-            }
-
-            // 2. Parsujemy listę tokenów, otrzymujemy obiekt AST
-            var parser = new Parser(tokens);
-            ProcedureNode root = parser.ParseProcedure();
-
-            // 3. Wypisujemy AST
+            /// Parser
+            _ParserService.ParseProgram(simpleSourceCode);
             Console.WriteLine("\n== AST ==");
+            var root = _PKBService.GetProcedureList()[0];
             PrintAst(root);
+
+            /// PQL
+            _PQLService.StartListening();
         }
 
         /// <summary>

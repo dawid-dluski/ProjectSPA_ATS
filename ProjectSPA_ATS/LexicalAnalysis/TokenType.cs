@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ProjectSPA_ATS.Lexer
+namespace ProjectSPA_ATS.LexicalAnalysis
 {
     public enum TokenType
     {
