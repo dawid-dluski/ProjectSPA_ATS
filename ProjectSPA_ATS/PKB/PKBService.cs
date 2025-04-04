@@ -3,9 +3,15 @@ using ProjectSPA_ATS.Exceptions;
 
 namespace ProjectSPA_ATS.PKB
 {
-    class PKBService : IPBKService
+    sealed public class PKBService : IPBKService
     {
-        private List<ProcedureNode> ProcedureList;
+        private static readonly PKBService _instance = new PKBService();
+        private PKBService() { }
+
+        public static PKBService Instance => _instance;
+        
+
+        private List<ProcedureNode> ProcedureList = new List<ProcedureNode>();
         //private List<Calls> CallsList;
         //private List<Modifies> ModifiesList;
         //private List<Uses> UsesList;
