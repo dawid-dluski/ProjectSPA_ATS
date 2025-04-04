@@ -8,6 +8,5 @@ namespace ProjectSPA_ATS.Structures.AST
 {
     public abstract class StatementNode : AstNode
     {
-        // Można dodać np. właściwość StatementId jeżeli chcemy numerować instrukcje
-    }
+        public int Id { get; }
 }
