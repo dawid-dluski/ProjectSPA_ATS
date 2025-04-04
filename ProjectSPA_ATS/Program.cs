@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using ProjectSPA_ATS.AST;
 using ProjectSPA_ATS.PQL;
 using ProjectSPA_ATS.Parser;
 using ProjectSPA_ATS.PKB;
+using ProjectSPA_ATS.Structures.AST;
+using ProjectSPA_ATS.Helpers;
 
 namespace SimpleSPA
 {
@@ -16,25 +17,8 @@ namespace SimpleSPA
             ParserService _ParserService = ParserService.GetInstance(_PKBService);
             PQLService _PQLService = PQLService.GetInstance(_PKBService);
 
-            // Loding simple code from source file
-            string simpleSourceCode = String.Empty;
-            string fileName = args.Length > 0 ? args[0] : "SimpleExample.txt";
-            if (File.Exists(fileName))
-            {
-                try
-                {
-                    simpleSourceCode = File.ReadAllText(fileName);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Load file error: {ex.Message}");
-                }
-            }
-            else
-            {
-                Console.WriteLine($"File does not exist.");
-                return;
-            }
+            /// Loding simple code from source file
+            string simpleSourceCode = FileHelper.LoadFileContent(args);
 
             /// Parser
             _ParserService.ParseProgram(simpleSourceCode);
