@@ -1,6 +1,6 @@
-﻿using ProjectSPA_ATS.AST;
-using ProjectSPA_ATS.LexicalAnalysis;
+﻿using ProjectSPA_ATS.LexicalAnalysis;
 using ProjectSPA_ATS.PKB;
+using ProjectSPA_ATS.Structures.AST;
 
 namespace ProjectSPA_ATS.Parser
 {

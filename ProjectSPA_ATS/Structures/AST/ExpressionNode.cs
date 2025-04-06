@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ProjectSPA_ATS.AST
+namespace ProjectSPA_ATS.Structures.AST
 {
-    public abstract class AstNode { }
+    public abstract class ExpressionNode : AstNode { }
 }
