@@ -63,9 +63,9 @@ namespace ProjectSPA_ATS.Parser
             Eat(TokenType.Procedure);                     // spodziewamy się 'procedure'
             Token nameToken = Eat(TokenType.Identifier);  // nazwa procedury
             string procName = nameToken.Value;
-            Eat(TokenType.LBrace);                       // '{'
+            Eat(TokenType.LBrace);                       
             List<StatementNode> stmtList = ParseStmtList();
-            Eat(TokenType.RBrace);                       // '}'
+            Eat(TokenType.RBrace);                       
 
             return new ProcedureNode(procName, stmtList);
         }
@@ -100,20 +100,20 @@ namespace ProjectSPA_ATS.Parser
             // Po wywołaniu ParseStmt zakładamy, że bieżący token to Identifier
             Token varToken = Eat(TokenType.Identifier);
             string varName = varToken.Value;
-            Eat(TokenType.Assign);            // '='
+            Eat(TokenType.Assign);            
             ExpressionNode exprNode = ParseExpr();
-            Eat(TokenType.Semicolon);         // ';'
+            Eat(TokenType.Semicolon);        
             return new AssignNode(varName, exprNode);
         }
 
         private WhileNode ParseWhile()
         {
-            Eat(TokenType.While);             // 'while'
+            Eat(TokenType.While);             
             Token condToken = Eat(TokenType.Identifier);  // warunek - zmienna
             string condVar = condToken.Value;
-            Eat(TokenType.LBrace);            // '{'
+            Eat(TokenType.LBrace);            
             List<StatementNode> body = ParseStmtList();
-            Eat(TokenType.RBrace);            // '}'
+            Eat(TokenType.RBrace);            
             return new WhileNode(condVar, body);
         }
 
@@ -131,6 +131,7 @@ namespace ProjectSPA_ATS.Parser
             return left;
         }
 
+        // parsuje wyrazenie np. a+2+b
         private ExpressionNode ParseFactor()
         {
             if (CurrentToken.Type == TokenType.Number)
