@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ProjectSPA_ATS.Structures
+namespace ProjectSPA_ATS.Helpers
 {
-    class Modifie
+    class ASTHelper
     {
     }
 }
