@@ -1,5 +1,6 @@
 ﻿using ProjectSPA_ATS.Structures;
 using ProjectSPA_ATS.Structures.AST;
+using System.Xml.Linq;
 
 namespace ProjectSPA_ATS.PKB
 {
@@ -22,5 +23,18 @@ namespace ProjectSPA_ATS.PKB
         List<Modify> GetModifyList();
         Modify GetModifyByIndex(int index);
         int GetModifyListSize();
+
+        //GetFollowedStarBy
+        //GetFollowedBy
+        //GetFollowsStar
+        //GetFollows
+        //GetParentedStarBy
+        //GetParentedBy
+        //GetModified
+        //GetVarName
+        //GetModifies
+        //GetUsed
+        //GetVarName
+        //GetUses
     }
 }

@@ -21,6 +21,26 @@ namespace ProjectSPA_ATS.LexicalAnalysis
         Identifier, // nazwa zmiennej lub procedury
         Number,     // stała liczbowa
                     // Specjalny:
-        EndOfFile   // koniec wejścia
+        EndOfFile,  // koniec wejścia
+
+        // PQL
+        Select,
+        Such,
+        That,
+        With,
+        Boolean,
+        Comma,
+        LParen,
+        RParen,
+        LAngle,
+        RAngle,
+        DesignEntity,     // stmt, assign, while, variable, constant, prog_line
+        StringLiteral,    // "x"
+        Underscore,       // _
+        Dot,              // .
+        Equals,           // =
+        RelRef,           // Follows, Parent, Modifies, Uses
+        RelRefT,          // Follows*, Parent*, etc.
+        AttributeName     // stmt#, varName, etc.
     }
 }
