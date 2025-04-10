@@ -54,6 +54,10 @@ namespace ProjectSPA_ATS.Parser
             initTokens(tokens);
             ProcedureNode root = ParseProcedure();
             _PBKService.AddProcedure(root);
+
+            var extractor = new DesignExtractor(_PBKService);
+            extractor.Extract(root);
+
             return true;
         }
 

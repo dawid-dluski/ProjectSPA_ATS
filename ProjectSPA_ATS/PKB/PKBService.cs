@@ -163,5 +163,10 @@ namespace ProjectSPA_ATS.PKB
         {
             return ParentList.Count;
         }
+
+        public List<Follow> GetFollowAll() => FollowList;
+        public List<Parent> GetParentAll() => ParentList;
+        public List<Use> GetUsesAll() => UseList;
+        public List<Modify> GetModifyAll() => ModifyList;
     }
 }

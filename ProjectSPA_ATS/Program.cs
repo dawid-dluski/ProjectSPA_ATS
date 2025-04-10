@@ -13,9 +13,9 @@ namespace SimpleSPA
         static void Main(string[] args)
         {
             /// Services
-            PKBService _PKBService = PKBService.Instance;
-            ParserService _ParserService = ParserService.GetInstance(_PKBService);
-            PQLService _PQLService = PQLService.GetInstance(_PKBService);
+            PKBService _pbkService = PKBService.Instance;
+            ParserService _ParserService = ParserService.GetInstance(_pbkService);
+            PQLService _PQLService = PQLService.GetInstance(_pbkService);
 
             /// Loding simple code from source file
             string simpleSourceCode = FileHelper.LoadFileContent(args);
@@ -23,7 +23,7 @@ namespace SimpleSPA
             /// Parser
             _ParserService.ParseProgram(simpleSourceCode);
             Console.WriteLine("\n== AST ==");
-            var root = _PKBService.GetProcedureList()[0];
+            var root = _pbkService.GetProcedureList()[0];
             PrintAst(root);
 
             /// PQL
