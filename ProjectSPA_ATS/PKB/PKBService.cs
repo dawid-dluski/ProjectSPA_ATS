@@ -7,7 +7,13 @@ namespace ProjectSPA_ATS.PKB
     sealed public class PKBService : IPBKService
     {
         private static readonly PKBService _instance = new PKBService();
-        private PKBService() { }
+        private PKBService() 
+        {
+            ModifyList = new List<Modify>();
+            UseList = new List<Use>();
+            FollowList = new List<Follow>();
+            ParentList = new List<Parent>();
+        }
 
         public static PKBService Instance => _instance;
         
@@ -90,6 +96,72 @@ namespace ProjectSPA_ATS.PKB
         public int GetModifyListSize()
         {
             return ModifyList.Count;
+        }
+
+        // Follow API
+        public void AddFollow(Follow f)
+        {
+            FollowList.Add(f);
+        }
+        public List<Follow> GetFollowList()
+        {
+            return FollowList;
+        }
+        public Follow GetFollowByIndex(int i)
+        {
+            if (i < 0 || i >= FollowList.Count)
+            {
+                throw new IndexOutOfRangeException("Index out of range");
+            }
+            return FollowList[i];
+        }
+        public int GetFollowListSize()
+        {
+            return FollowList.Count;
+        }
+
+        // Use API
+        public void AddUses(Use u)
+        {
+            UseList.Add(u);
+        }
+        public List<Use> GetUseList()
+        {
+            return UseList;
+        }
+        public Use GetUseByIndex(int i)
+        {
+            if (i < 0 || i >= UseList.Count)
+            {
+                throw new IndexOutOfRangeException("Index out of range");
+            }
+            return UseList[i];
+        }
+        public int GetUseListSize()
+        {
+            return UseList.Count;
+        }
+
+        // Parent API
+        public void AddParent(Parent p)
+        {
+            ParentList.Add(p);
+        }
+        public List<Parent> GetParentList()
+        {
+            return ParentList;
+        }
+        public Parent GetParentByIndex(int i)
+        {
+            if (i < 0 || i >= ParentList.Count)
+            {
+                throw new IndexOutOfRangeException("Index out of range");
+            }
+            return ParentList[i];
+        }
+        public int GetParentListSize()
+        {
+            return ParentList.Count;
         }
     }
 }
