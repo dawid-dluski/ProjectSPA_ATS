@@ -23,18 +23,23 @@ namespace ProjectSPA_ATS.PKB
         List<Modify> GetModifyList();
         Modify GetModifyByIndex(int index);
         int GetModifyListSize();
+        
+        // Uses API
+        void AddUses(Use use);
+        List<Use> GetUseList();
+        Use GetUseByIndex(int index);
+        int GetUseListSize();
 
-        //GetFollowedStarBy
-        //GetFollowedBy
-        //GetFollowsStar
-        //GetFollows
-        //GetParentedStarBy
-        //GetParentedBy
-        //GetModified
-        //GetVarName
-        //GetModifies
-        //GetUsed
-        //GetVarName
-        //GetUses
+        // Follow API
+        void AddFollow(Follow follow);
+        List<Follow> GetFollowList();
+        Follow GetFollowByIndex(int index);
+        int GetFollowListSize();
+
+        // Parent API
+        void AddParent(Parent parent);
+        List<Parent> GetParentList();
+        Parent GetParentByIndex(int index);
+        int GetParentListSize();
     }
 }
