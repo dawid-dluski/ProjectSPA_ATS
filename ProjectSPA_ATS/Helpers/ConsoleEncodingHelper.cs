@@ -10,6 +10,7 @@ namespace ProjectSPA_ATS.Helpers
     {
         public static void SetIBM852Encoding()
         {
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             var ibm852 = Encoding.GetEncoding(852);
             Console.InputEncoding = ibm852;
             Console.OutputEncoding = ibm852;
