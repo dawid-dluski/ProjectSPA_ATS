@@ -12,6 +12,8 @@ namespace SimpleSPA
     {
         static void Main(string[] args)
         {
+            ConsoleEncodingHelper.SetIBM852Encoding();
+
             /// Services
             PKBService _pbkService = PKBService.Instance;
             ParserService _ParserService = ParserService.GetInstance(_pbkService);
