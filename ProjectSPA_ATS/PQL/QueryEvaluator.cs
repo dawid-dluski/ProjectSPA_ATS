@@ -59,7 +59,7 @@ namespace ProjectSPA_ATS.PQL
             {
                 var followed = isTransitive
                     ? _pkb.GetFollowedStarBy(arg1.Value)
-                    : new List<int> { _pkb.GetFollowedBy(arg1.Value) };
+                    : _pkb.GetFollowedBy(arg1.Value);
 
                 return FilterResults(followed, clause.Arg2);
             }
@@ -68,7 +68,7 @@ namespace ProjectSPA_ATS.PQL
             {
                 var follows = isTransitive
                     ? _pkb.GetFollowsStar(arg2.Value)
-                    : new List<int> { _pkb.GetFollows(arg2.Value) };
+                    : _pkb.GetFollows(arg2.Value) ;
 
                 return FilterResults(follows, clause.Arg1);
             }
@@ -98,7 +98,7 @@ namespace ProjectSPA_ATS.PQL
             if (int.TryParse(clause.Arg1, out int stmtNum))
             {
                 var vars = _pkb.GetModified(stmtNum);
-                return FilterResults(vars.Select(v => _pkb.GetVarName(v)), clause.Arg2);
+                //return FilterResults(vars.Select(v => _pkb.GetVarName(v)), clause.Arg2);
             }
 
             if (clause.Arg2.StartsWith("\""))
@@ -116,7 +116,7 @@ namespace ProjectSPA_ATS.PQL
             if (int.TryParse(clause.Arg1, out int stmtNum))
             {
                 var vars = _pkb.GetUsed(stmtNum);
-                return FilterResults(vars.Select(v => _pkb.GetVarName(v)), clause.Arg2);
+                //return FilterResults(vars.Select(v => _pkb.GetVarName(v)), clause.Arg2);
             }
 
             if (clause.Arg2.StartsWith("\""))
