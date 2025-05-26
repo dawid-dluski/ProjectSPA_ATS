@@ -63,7 +63,7 @@ namespace ProjectSPA_ATS.LexicalAnalysis
                     tokens.Add(new Token(TokenType.Number, number));
                     continue;
                 }
-                // symbole jednopoznaki:
+                
                 switch (c)
                 {
                     case '{':

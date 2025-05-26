@@ -9,14 +9,14 @@ namespace ProjectSPA_ATS.LexicalAnalysis
     public enum TokenType
     {
         // Słowa kluczowe:
-        Procedure,  // "procedure"
-        While,      // "while"
+        Procedure,  
+        While,      
                     // Symbole:
-        LBrace,     // "{"
-        RBrace,     // "}"
-        Assign,     // "="
-        Semicolon,  // ";"
-        Plus,       // "+"
+        LBrace,     
+        RBrace,     
+        Assign,     
+        Semicolon, 
+        Plus,       
                     // Identyfikatory i wartości:
         Identifier, // nazwa zmiennej lub procedury
         Number,     // stała liczbowa

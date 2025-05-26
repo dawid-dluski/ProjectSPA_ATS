@@ -23,7 +23,7 @@ namespace ProjectSPA_ATS.Parser
         private int position = 0;
         private Token CurrentToken => tokens[position];
 
-        // Konstruktor przyjmujący listę tokenów
+        
         public void initTokens(List<Token> tokens) 
         {
             this.tokens = tokens;
@@ -77,8 +77,7 @@ namespace ProjectSPA_ATS.Parser
         private List<StatementNode> ParseStmtList()
         {
             var statements = new List<StatementNode>();
-            // Parsujemy wielokrotnie instrukcje dopóki nie natrafimy na '}' lub EOF.
-            // (Uwaga: nie wywołujemy Eat tutaj na '}' – sprawdzamy tylko, czy nie należy przerwać.)
+
             while (CurrentToken.Type != TokenType.RBrace && CurrentToken.Type != TokenType.EndOfFile)
             {
                 statements.Add(ParseStmt());
@@ -101,23 +100,23 @@ namespace ProjectSPA_ATS.Parser
 
         private AssignNode ParseAssign()
         {
-            // Po wywołaniu ParseStmt zakładamy, że bieżący token to Identifier
+            
             Token varToken = Eat(TokenType.Identifier);
             string varName = varToken.Value;
-            Eat(TokenType.Assign);            // '='
+            Eat(TokenType.Assign);            
             ExpressionNode exprNode = ParseExpr();
-            Eat(TokenType.Semicolon);         // ';'
+            Eat(TokenType.Semicolon);        
             return new AssignNode(varName, exprNode);
         }
 
         private WhileNode ParseWhile()
         {
-            Eat(TokenType.While);             // 'while'
-            Token condToken = Eat(TokenType.Identifier);  // warunek - zmienna
+            Eat(TokenType.While);             
+            Token condToken = Eat(TokenType.Identifier);  
             string condVar = condToken.Value;
-            Eat(TokenType.LBrace);            // '{'
+            Eat(TokenType.LBrace);            
             List<StatementNode> body = ParseStmtList();
-            Eat(TokenType.RBrace);            // '}'
+            Eat(TokenType.RBrace);            
             return new WhileNode(condVar, body);
         }
 
