@@ -10,7 +10,11 @@ namespace ProjectSPA_ATS.LexicalAnalysis
     {
         // Słowa kluczowe:
         Procedure,  
-        While,      
+        While, 
+        If, 
+       Then, 
+       Else,
+       Call,
                     // Symbole:
         LBrace,     
         RBrace,     
