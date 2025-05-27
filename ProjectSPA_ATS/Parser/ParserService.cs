@@ -119,6 +119,28 @@ namespace ProjectSPA_ATS.Parser
             Eat(TokenType.RBrace);            
             return new WhileNode(condVar, body);
         }
+        private IfNode ParseIf()
+       {
+           Eat(TokenType.If);
+           var cond = Eat(TokenType.Identifier).Value;
+           Eat(TokenType.Then);
+           Eat(TokenType.LBrace);
+           var thenB = ParseStmtList();
+           Eat(TokenType.RBrace);
+           Eat(TokenType.Else);
+           Eat(TokenType.LBrace);
+           var elseB = ParseStmtList();
+           Eat(TokenType.RBrace);
+           return new IfNode(cond, thenB, elseB);
+       }
+
+       private CallNode ParseCall()
+       {
+           Eat(TokenType.Call);
+           string callee = Eat(TokenType.Identifier).Value;
+           Eat(TokenType.Semicolon);
+           return new CallNode(callee);
+       }
 
         private ExpressionNode ParseExpr()
         {
