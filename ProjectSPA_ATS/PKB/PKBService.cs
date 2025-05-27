@@ -296,5 +296,83 @@ namespace ProjectSPA_ATS.PKB
         public List<Modify> GetModifyAll() => ModifyList;
 
         public IReadOnlyList<Call> GetCallsAll() => CallList;
+
+        /* ==== Modifies / Uses – procedury ==== */
+
+        public bool IsProcModifies(string proc, string var) => GetProcModifies(proc).Contains(var);
+        public bool IsProcUses(string proc, string var) => GetProcUses(proc).Contains(var);
+
+        public IEnumerable<string> GetProcModifies(string proc) =>
+            CollectModUses(proc, true);
+
+        public IEnumerable<string> GetProcUses(string proc) =>
+            CollectModUses(proc, false);
+
+        /* ==== Calls ==== */
+        public bool IsCalls(string caller, string callee) =>
+            CallList.Any(c => c.CallerProc == caller && c.CalleeProc == callee);
+
+        public IEnumerable<string> GetCallees(string caller, bool transitive = false)
+        {
+            if (!transitive) return CallList.Where(c => c.CallerProc == caller).Select(c => c.CalleeProc);
+            return DfsForward(caller, new()).Where(p => p != caller);
+        }
+
+        public IEnumerable<string> GetCallers(string callee, bool transitive = false)
+        {
+            if (!transitive) return CallList.Where(c => c.CalleeProc == callee).Select(c => c.CallerProc);
+            return DfsBackward(callee, new()).Where(p => p != callee);
+        }
+
+        public bool IsCallsStar(string caller, string callee) =>
+            GetCallees(caller, true).Contains(callee);
+
+        private IEnumerable<string> CollectModUses(string proc, bool wantMod)
+        {
+            var visited = new HashSet<string>();
+            var vars = new HashSet<string>();
+
+            void DFS(string p)
+            {
+                if (!visited.Add(p)) return;
+
+                // bezpośrednie
+                var stmtIds = ProcedureList.First(pr => pr.Name == p)
+                                            .Statements.Select(s => s.StatementId);
+
+                if (wantMod)
+                    vars.UnionWith(ModifyList.Where(m => stmtIds.Contains(m.Statement))
+                                             .Select(m => m.Variable));
+                else
+                    vars.UnionWith(UseList.Where(u => stmtIds.Contains(u.StatementId))
+                                          .Select(u => u.VariableName));
+
+                // kolejne procedury
+                foreach (var callee in GetCallees(p))
+                    DFS(callee);
+            }
+            DFS(proc);
+            return vars;
+        }
+
+        private IEnumerable<string> DfsForward(string start, HashSet<string> visited)
+        {
+            if (!visited.Add(start)) yield break;
+            foreach (var callee in CallList.Where(c => c.CallerProc == start).Select(c => c.CalleeProc))
+            {
+                yield return callee;
+                foreach (var deep in DfsForward(callee, visited)) yield return deep;
+            }
+        }
+
+        private IEnumerable<string> DfsBackward(string start, HashSet<string> visited)
+        {
+            if (!visited.Add(start)) yield break;
+            foreach (var caller in CallList.Where(c => c.CalleeProc == start).Select(c => c.CallerProc))
+            {
+                yield return caller;
+                foreach (var deep in DfsBackward(caller, visited)) yield return deep;
+            }
+        }
     }
 }

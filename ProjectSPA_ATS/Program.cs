@@ -26,9 +26,9 @@ namespace SimpleSPA
             _ParserService.ParseProgram(simpleSourceCode);
             Console.WriteLine("\n== AST ==");
             var root = _pbkService.GetProcedureList();
-            foreach( var procedure in root )
+            foreach (var procedure in root)
             {
-            ASTHelper.PrintAst(procedure);
+                ASTHelper.PrintAst(procedure);
             }
 
             /// PQL

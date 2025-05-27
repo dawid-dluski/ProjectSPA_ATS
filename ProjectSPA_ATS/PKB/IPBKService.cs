@@ -1,18 +1,24 @@
 ﻿using ProjectSPA_ATS.Structures;
 using ProjectSPA_ATS.Structures.AST;
-using System.Xml.Linq;
 
 namespace ProjectSPA_ATS.PKB
 {
     public interface IPBKService
     {
-        // Procedure API
+        // Design Extractor API
         void AddProcedure(ProcedureNode procedure);
+        void AddVariable(AssignNode variable);
+        void AddModify(Modify modify);
+        void AddCall(string caller, string callee);
+        void AddUses(Use use);
+        void AddFollow(Follow follow);
+        void AddParent(Parent parent);
+
+        // Procedure API
         List<ProcedureNode> GetProcedureList();
         ProcedureNode GetProcedureByName(string name);
 
         // Variable API
-        void AddVariable(AssignNode variable);
         List<AssignNode> GetVariableList();
         AssignNode GetVariableByName(string name);
         AssignNode GetVariableByIndex(int index);
@@ -22,7 +28,6 @@ namespace ProjectSPA_ATS.PKB
         string GetVarName(Use use);
 
         // Modify API
-        void AddModify(Modify modify);
         List<Modify> GetModifyList();
         Modify GetModifyByIndex(int index);
         int GetModifyListSize();
@@ -30,7 +35,6 @@ namespace ProjectSPA_ATS.PKB
         List<int> GetModifies(string varName);
 
         // Use API
-        void AddUses(Use use);
         List<Use> GetUseList();
         Use GetUseByIndex(int index);
         int GetUseListSize();
@@ -38,7 +42,6 @@ namespace ProjectSPA_ATS.PKB
         List<int> GetUses(string varName);
 
         // Follow API
-        void AddFollow(Follow follow);
         List<Follow> GetFollowList();
         Follow GetFollowByIndex(int index);
         int GetFollowListSize();
@@ -48,13 +51,22 @@ namespace ProjectSPA_ATS.PKB
         List<int> GetFollows(int stmtIndex);
 
         // Parent API
-        void AddParent(Parent parent);
         List<Parent> GetParentList();
         Parent GetParentByIndex(int index);
         int GetParentListSize();
         List<int> GetParentedStarBy(int stmtIndex);
         List<int> GetParentedBy(int stmtIndex);
 
-        void AddCall(string caller, string callee);
+        // Modifies/Uses API
+        bool IsProcModifies(string proc, string var);
+        bool IsProcUses(string proc, string var);
+        IEnumerable<string> GetProcModifies(string proc);
+        IEnumerable<string> GetProcUses(string proc);
+
+        // Calls API (Zweryfikowane)
+        bool IsCalls(string caller, string callee);
+        bool IsCallsStar(string caller, string callee);
+        IEnumerable<string> GetCallees(string caller, bool transitive = false);
+        IEnumerable<string> GetCallers(string callee, bool transitive = false);
     }
 }
