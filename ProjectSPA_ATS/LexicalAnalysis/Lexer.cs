@@ -45,6 +45,22 @@ namespace ProjectSPA_ATS.LexicalAnalysis
                     {
                         tokens.Add(new Token(TokenType.While));
                     }
+                    else if (text == "if")
+                    {
+                         tokens.Add(new Token(TokenType.If));
+                     }
+                     else if (text == "else")
+                     {
+                         tokens.Add(new Token(TokenType.Else));
+                     }
+                      else if (text == "call")
+                     {
+                         tokens.Add(new Token(TokenType.Call));
+                     }
+                     else if (text == "then")
+                     {
+                         tokens.Add(new Token(TokenType.Then));
+                     }
                     else
                     {
                         tokens.Add(new Token(TokenType.Identifier, text));
