@@ -79,7 +79,7 @@ namespace ProjectSPA_ATS.LexicalAnalysis
                     tokens.Add(new Token(TokenType.Number, number));
                     continue;
                 }
-                
+
                 switch (c)
                 {
                     case '{':
@@ -100,6 +100,22 @@ namespace ProjectSPA_ATS.LexicalAnalysis
                         break;
                     case ';':
                         tokens.Add(new Token(TokenType.Semicolon));
+                        i++;
+                        break;
+                    case '-':
+                        tokens.Add(new Token(TokenType.Minus));
+                        i++;
+                        break;
+                    case '*':
+                        tokens.Add(new Token(TokenType.Star));
+                        i++;
+                        break;
+                    case '(':
+                        tokens.Add(new Token(TokenType.LParen));
+                        i++;
+                        break;
+                    case ')':
+                        tokens.Add(new Token(TokenType.RParen));
                         i++;
                         break;
                     default:

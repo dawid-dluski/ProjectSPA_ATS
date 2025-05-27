@@ -1,6 +1,7 @@
 ﻿using ProjectSPA_ATS.LexicalAnalysis;
 using ProjectSPA_ATS.PKB;
 using ProjectSPA_ATS.Structures.AST;
+using System.Xml.Linq;
 
 namespace ProjectSPA_ATS.Parser
 {
@@ -50,14 +51,18 @@ namespace ProjectSPA_ATS.Parser
                 Console.WriteLine(token);
             }
 
-            // 2. Parsujemy listę tokenów, otrzymujemy obiekt AST
+            //Parsujemy listę tokenów, otrzymujemy obiekt AST
             initTokens(tokens);
-            ProcedureNode root = ParseProcedure();
-            _PBKService.AddProcedure(root);
 
-            var extractor = new DesignExtractor(_PBKService);
-            extractor.Extract(root);
 
+            while (CurrentToken.Type != TokenType.EndOfFile)
+            {
+                var procNode = ParseProcedure();
+                _PBKService.AddProcedure(procNode);
+
+                // extractor po każdej procedurze
+                new DesignExtractor(_PBKService).Extract(procNode);
+            }
             return true;
         }
 
@@ -67,35 +72,34 @@ namespace ProjectSPA_ATS.Parser
             Eat(TokenType.Procedure);                     // spodziewamy się 'procedure'
             Token nameToken = Eat(TokenType.Identifier);  // nazwa procedury
             string procName = nameToken.Value;
-            Eat(TokenType.LBrace);                       // '{'
+            Eat(TokenType.LBrace);                       
             List<StatementNode> stmtList = ParseStmtList();
-            Eat(TokenType.RBrace);                       // '}'
-
+            Eat(TokenType.RBrace);                       
+           
             return new ProcedureNode(procName, stmtList);
         }
 
         private List<StatementNode> ParseStmtList()
         {
             var statements = new List<StatementNode>();
-
-            while (CurrentToken.Type != TokenType.RBrace && CurrentToken.Type != TokenType.EndOfFile)
+           
+                while (CurrentToken.Type != TokenType.RBrace && CurrentToken.Type != TokenType.EndOfFile)
             {
-                statements.Add(ParseStmt());
+                statements.Add(ParseStmt()); 
             }
             return statements;
         }
 
         public StatementNode ParseStmt()
         {
-            if (CurrentToken.Type == TokenType.Identifier)
+            return CurrentToken.Type switch
             {
-                return ParseAssign();
-            }
-            if (CurrentToken.Type == TokenType.While)
-            {
-                return ParseWhile();
-            }
-            throw new Exception($"Nieznana instrukcja zaczynająca się od {CurrentToken.Type}");
+                TokenType.Identifier => ParseAssign(),
+                TokenType.While => ParseWhile(),
+                TokenType.If => ParseIf(),
+                TokenType.Call => ParseCall(),
+                _ => throw new($"Nieznany token {CurrentToken}")
+            };
         }
 
         private AssignNode ParseAssign()
@@ -142,20 +146,32 @@ namespace ProjectSPA_ATS.Parser
            return new CallNode(callee);
        }
 
+
         private ExpressionNode ParseExpr()
         {
-            // expr -> factor { '+' factor }
-            ExpressionNode left = ParseFactor();
-            while (CurrentToken.Type == TokenType.Plus)
+           
+            ExpressionNode left = ParseTerm();
+            while (CurrentToken.Type == TokenType.Plus || CurrentToken.Type == TokenType.Minus)
             {
-                Eat(TokenType.Plus);
-                ExpressionNode right = ParseFactor();
-                // Tworzymy węzeł binarnego dodawania, łącząc left i right
-                left = new BinaryOpNode(left, right, "+");
+                var op = CurrentToken.Type; 
+                Eat(op);
+                var right = ParseTerm();
+                left = new BinaryOpNode(left, right, op == TokenType.Plus ? "+" : "-");
             }
             return left;
         }
 
+        private ExpressionNode ParseTerm()   // mnożenie
+        {
+            var left = ParseFactor();
+            while (CurrentToken.Type == TokenType.Star)
+            {
+                Eat(TokenType.Star);
+                var right = ParseFactor();
+                left = new BinaryOpNode(left, right, "*");
+            }
+            return left;
+        }
         private ExpressionNode ParseFactor()
         {
             if (CurrentToken.Type == TokenType.Number)
@@ -169,6 +185,14 @@ namespace ProjectSPA_ATS.Parser
                 Token varToken = Eat(TokenType.Identifier);
                 string name = varToken.Value;
                 return new VarRefNode(name);
+            }
+
+            if(CurrentToken.Type == TokenType.LParen)
+            {
+                Eat(TokenType.LParen);
+                ExpressionNode inner = ParseExpr();
+                Eat(TokenType.RParen);
+                return inner;
             }
             throw new Exception($"Nieoczekiwany token w wyrażeniu: {CurrentToken.Type}");
         }

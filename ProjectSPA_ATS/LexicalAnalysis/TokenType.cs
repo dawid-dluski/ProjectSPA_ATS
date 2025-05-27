@@ -21,7 +21,9 @@ namespace ProjectSPA_ATS.LexicalAnalysis
         Assign,     
         Semicolon, 
         Plus,       
-                    // Identyfikatory i wartości:
+        Minus,
+        Star,
+        // Identyfikatory i wartości:
         Identifier, // nazwa zmiennej lub procedury
         Number,     // stała liczbowa
                     // Specjalny:
@@ -46,5 +48,8 @@ namespace ProjectSPA_ATS.LexicalAnalysis
         RelRef,           // Follows, Parent, Modifies, Uses
         RelRefT,          // Follows*, Parent*, etc.
         AttributeName     // stmt#, varName, etc.
+
+
+
     }
 }

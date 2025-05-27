@@ -38,6 +38,26 @@ namespace ProjectSPA_ATS.Helpers
                     Console.WriteLine($"{pad}}}");
                     break;
 
+                case IfNode ifNode:
+                    Console.WriteLine($"{pad}If: {ifNode.ConditionVar}");
+                    Console.WriteLine($"{pad}Then {{");
+                    foreach (var stmt in ifNode.ThenBody)
+                    {
+                        PrintAst(stmt, indent + 2);
+                    }
+                    Console.WriteLine($"{pad}}}");
+                    Console.WriteLine($"{pad}else {{");
+                    foreach (var stmt in ifNode.ElseBody)
+                    {
+                        PrintAst(stmt, indent + 2);
+                    }
+                    Console.WriteLine($"{pad}}}");
+                    break;
+
+                case CallNode call:
+                    Console.WriteLine($"{pad}Call: {call.Callee}");
+                    break;
+
                 case BinaryOpNode binOp:
                     Console.WriteLine($"{pad}BinaryOp '{binOp.Operator}':");
                     Console.WriteLine($"{pad}  Left:");
@@ -60,4 +80,5 @@ namespace ProjectSPA_ATS.Helpers
             }
         }
     }
+
 }
