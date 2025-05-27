@@ -54,5 +54,7 @@ namespace ProjectSPA_ATS.PKB
         int GetParentListSize();
         List<int> GetParentedStarBy(int stmtIndex);
         List<int> GetParentedBy(int stmtIndex);
+
+        void AddCall(string caller, string callee);
     }
 }

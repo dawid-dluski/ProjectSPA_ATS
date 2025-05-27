@@ -7,7 +7,7 @@ namespace ProjectSPA_ATS.PKB
     sealed public class PKBService : IPBKService
     {
         private static readonly PKBService _instance = new PKBService();
-        private PKBService() 
+        private PKBService()
         {
             ModifyList = new List<Modify>();
             UseList = new List<Use>();
@@ -16,16 +16,17 @@ namespace ProjectSPA_ATS.PKB
         }
 
         public static PKBService Instance => _instance;
-        
+
         private List<ProcedureNode> ProcedureList = new List<ProcedureNode>();
         private List<AssignNode> VariableList;
         private List<Modify> ModifyList;
         private List<Use> UseList;
         private List<Follow> FollowList;
         private List<Parent> ParentList;
-
+        private List<Call> CallList = new();
         // Procedure API
-        public void AddProcedure(ProcedureNode proc) {
+        public void AddProcedure(ProcedureNode proc)
+        {
             if (ProcedureList.Any(x => x.Name == proc.Name))
             {
                 throw new ProcedureNameConflictException();
@@ -37,11 +38,11 @@ namespace ProjectSPA_ATS.PKB
         {
             return ProcedureList;
         }
-        public ProcedureNode GetProcedureByName(string n) 
+        public ProcedureNode GetProcedureByName(string n)
         {
             return ProcedureList.FirstOrDefault(x => x.Name == n);
         }
-        
+
         // Variable API
         public void AddVariable(AssignNode v)
         {
@@ -288,9 +289,12 @@ namespace ProjectSPA_ATS.PKB
                 .ToList();
         }
 
+        public void AddCall(string caller, string callee) => CallList.Add(new Call(caller, callee));
         public List<Follow> GetFollowAll() => FollowList;
         public List<Parent> GetParentAll() => ParentList;
         public List<Use> GetUsesAll() => UseList;
         public List<Modify> GetModifyAll() => ModifyList;
+
+        public IReadOnlyList<Call> GetCallsAll() => CallList;
     }
 }
