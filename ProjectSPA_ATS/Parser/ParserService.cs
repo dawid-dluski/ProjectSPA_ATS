@@ -1,7 +1,6 @@
 ﻿using ProjectSPA_ATS.LexicalAnalysis;
 using ProjectSPA_ATS.PKB;
 using ProjectSPA_ATS.Structures.AST;
-using System.Xml.Linq;
 
 namespace ProjectSPA_ATS.Parser
 {
@@ -23,14 +22,12 @@ namespace ProjectSPA_ATS.Parser
         private List<Token> tokens;
         private int position = 0;
         private Token CurrentToken => tokens[position];
-
         
         public void initTokens(List<Token> tokens) 
         {
             this.tokens = tokens;
         }
 
-        // Pobiera bieżący token i przesuwa wskaźnik na następny
         private Token Eat(TokenType expectedType)
         {
             Token token = CurrentToken;
@@ -45,12 +42,6 @@ namespace ProjectSPA_ATS.Parser
         {
             var lexer = new Lexer(sourceCode);
             List<Token> tokens = lexer.GetTokens(sourceCode);
-            Console.WriteLine("== TOKENS ==");
-            foreach (var token in tokens)
-            {
-                Console.WriteLine(token);
-            }
-
             //Parsujemy listę tokenów, otrzymujemy obiekt AST
             initTokens(tokens);
 

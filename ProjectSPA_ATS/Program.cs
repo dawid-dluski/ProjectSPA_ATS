@@ -25,12 +25,6 @@ namespace SimpleSPA
 
             /// Parser
             _ParserService.ParseProgram(simpleSourceCode);
-            Console.WriteLine("\n== AST ==");
-            var root = _pbkService.GetProcedureList();
-            foreach (var procedure in root)
-            {
-                ASTHelper.PrintAst(procedure);
-            }
 
             /// PQL
             _PQLService.StartListening();
