@@ -17,10 +17,6 @@ namespace ProjectSPA_ATS.PKB
             _stmtCounter = 1;
 
             ProcessStmtList(proc.Statements, parentId: null);
-
-#if DEBUG
-            PrintAllRelations();
-#endif
         }
 
         private void ProcessStmtList(List<StatementNode> list, int? parentId)
@@ -86,8 +82,7 @@ namespace ProjectSPA_ATS.PKB
         /* --------------------  CALL  ------------------------------ */
         private void HandleCall(CallNode node, int id)
         {
-            _pkb.AddCall(_currentProc, node.Callee);          // Calls rel.
-            // W Iteracji 2 nie propagujemy jeszcze Mod/Use; zrobimy to w Iteracji 3
+            _pkb.AddCall(_currentProc, node.Callee);          // Calls rel
         }
 
         private IEnumerable<string> CollectUsedVars(ExpressionNode expr)
@@ -101,19 +96,6 @@ namespace ProjectSPA_ATS.PKB
                 default:
                     return Enumerable.Empty<string>();
             }
-        }
-
-
-        private void PrintAllRelations()
-        {
-            var pkb = _pkb as PKBService;
-            Console.WriteLine("\n=== PKB – DEBUG ===");
-            foreach (var f in pkb!.GetFollowAll()) Console.WriteLine($"Follows  ({f.PrecedingStmtId},{f.FollowingStmtId})");
-            foreach (var p in pkb.GetParentAll()) Console.WriteLine($"Parent   ({p.ParentStmtId},{p.ChildStmtId})");
-            foreach (var u in pkb.GetUsesAll()) Console.WriteLine($"Uses     ({u.StatementId},\"{u.VariableName}\")");
-            foreach (var m in pkb.GetModifyAll()) Console.WriteLine($"Modifies ({m.Statement},\"{m.Variable}\")");
-            foreach (var c in pkb.GetCallsAll()) Console.WriteLine($"Calls    (\"{c.CallerProc}\",\"{c.CalleeProc}\")");
-            Console.WriteLine("=== END DEBUG ===\n");
         }
     }
 }
