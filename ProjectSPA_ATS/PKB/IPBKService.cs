@@ -28,32 +28,16 @@ namespace ProjectSPA_ATS.PKB
         string GetVarName(Use use);
 
         // Modify API
-        List<Modify> GetModifyList();
-        Modify GetModifyByIndex(int index);
-        int GetModifyListSize();
-        string GetModified(int stmtIndex);
-        List<int> GetModifies(string varName);
+        public List<string> GetModified(int stmtId); // Działa
+        public List<int> GetModifies(string varName); // Działa
+        public bool IsProcModifies(string proc, string var); // Niedziała
+        public List<string> GetProcModifies(string proc); // Niedziała
 
         // Use API
-        List<Use> GetUseList();
-        Use GetUseByIndex(int index);
-        int GetUseListSize();
-        string GetUsed(int stmtIndex);
-        List<int> GetUses(string varName);
-
-        /* ========== Modifies / Uses – instrukcje ========== */
-        //bool IsModifies(int stmt, string var);
-        //bool IsUses(int stmt, string var);
-        //IEnumerable<string> GetModifiedVars(int stmt);
-        //IEnumerable<string> GetUsedVars(int stmt);
-
-        // Modifies / Uses – procedury
-        bool IsProcModifies(string proc, string var);
-        bool IsProcUses(string proc, string var);
-        //IEnumerable<string> GetProcModifies(string proc);
-        //IEnumerable<string> GetProcUses(string proc);
-        IEnumerable<Modify> GetProcModifies(string procName);
-        IEnumerable<Use> GetProcUses(string procName);
+        public List<string> GetUsed(int stmtId); // Działa
+        public List<int> GetUses(string varName); // Działa
+        public bool IsProcUses(string proc, string var); // Niedziała
+        public List<string> GetProcUses(string proc); // Niedziała
 
         // Parent API (Zweryfikowane, 100% gwaracji nie daje)
         List<Parent> GetParentList();

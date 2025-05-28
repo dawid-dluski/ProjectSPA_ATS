@@ -109,83 +109,131 @@ namespace ProjectSPA_ATS.PKB
         }
 
         // Modify API
-        
-        public List<Modify> GetModifyList()
+        public List<string> GetModified(int stmtId)
         {
-            return ModifyList;
-        }
-        public Modify GetModifyByIndex(int i)
-        {
-            if (i < 0 || i >= ModifyList.Count)
+            List<string> result = new List<string>();
+            foreach (var mod in ModifyList)
             {
-                throw new IndexOutOfRangeException("Index out of range");
+                if (mod.Statement == stmtId)
+                    result.Add(mod.Variable);
             }
-            return ModifyList[i];
-        }
-        public int GetModifyListSize()
-        {
-            return ModifyList.Count;
-        }
-        public string GetModified(int stmtIndex)
-        {
-            return ModifyList
-                .Where(m => m.Statement == stmtIndex)
-                .Select(m => m.Variable)
-                .FirstOrDefault();
+            return result;
         }
         public List<int> GetModifies(string varName)
         {
-            return ModifyList
-                .Where(m => m.Variable == varName)
-                .Select(m => m.Statement)
-                .ToList();
-        }
-
-        
-        // Use API
-        public List<Use> GetUseList()
-        {
-            return UseList;
-        }
-        public Use GetUseByIndex(int i)
-        {
-            if (i < 0 || i >= UseList.Count)
+            List<int> result = new List<int>();
+            foreach (var mod in ModifyList)
             {
-                throw new IndexOutOfRangeException("Index out of range");
+                if (mod.Variable == varName)
+                    result.Add(mod.Statement);
             }
-            return UseList[i];
+            return result;
         }
-        public int GetUseListSize()
+        public bool IsProcModifies(string proc, string var)
         {
-            return UseList.Count;
+            return GetProcModifies(proc).Contains(var);
         }
-        public string GetUsed(int stmtIndex)
+        public List<string> GetProcModifies(string proc)
         {
-            return UseList
-                .Where(u => u.StatementId == stmtIndex)
-                .Select(u => u.VariableName)
-                .FirstOrDefault();
+            HashSet<string> modifiedVars = new HashSet<string>();
+            HashSet<string> visitedProcs = new HashSet<string>();
+            Stack<string> stack = new Stack<string>();
+            visitedProcs.Add(proc);
+            stack.Push(proc);
+
+            while (stack.Count > 0)
+            {
+                string currentProc = stack.Pop();
+                ProcedureNode procNode = ProcedureList.FirstOrDefault(p => p.Name == currentProc);
+                if (procNode == null) continue;
+
+                List<int> stmtIds = new List<int>();
+                GatherStatementIds(procNode.Statements, stmtIds);
+
+                foreach (int stmtId in stmtIds)
+                {
+                    foreach (var mod in ModifyList)
+                    {
+                        if (mod.Statement == stmtId)
+                            modifiedVars.Add(mod.Variable);
+                    }
+                }
+
+                foreach (var call in CallList)
+                {
+                    if (call.CallerProc == currentProc && !visitedProcs.Contains(call.CalleeProc))
+                    {
+                        visitedProcs.Add(call.CalleeProc);
+                        stack.Push(call.CalleeProc);
+                    }
+                }
+            }
+
+            return modifiedVars.ToList();
+        }
+        // Use API
+        public List<string> GetUsed(int stmtId)
+        {
+            List<string> result = new List<string>();
+            foreach (var use in UseList)
+            {
+                if (use.StatementId == stmtId)
+                    result.Add(use.VariableName);
+            }
+            return result;
         }
         public List<int> GetUses(string varName)
         {
-            return UseList
-                .Where(u => u.VariableName == varName)
-                .Select(u => u.StatementId)
-                .ToList();
+            List<int> result = new List<int>();
+            foreach (var use in UseList)
+            {
+                if (use.VariableName == varName)
+                    result.Add(use.StatementId);
+            }
+            return result;
         }
-        // Modifies / Uses – procedury
-        public IEnumerable<Modify> GetProcModifies(string procName) =>
-            CollectProcModUses(procName, wantMod: true).Cast<Modify>();
+        public bool IsProcUses(string proc, string var)
+        {
+            return GetProcUses(proc).Contains(var);
+        }
+        public List<string> GetProcUses(string proc)
+        {
+            HashSet<string> usedVars = new HashSet<string>();
+            HashSet<string> visitedProcs = new HashSet<string>();
+            Stack<string> stack = new Stack<string>();
+            visitedProcs.Add(proc);
+            stack.Push(proc);
 
-        public IEnumerable<Use> GetProcUses(string procName) =>
-            CollectProcModUses(procName, wantMod: false).Cast<Use>();
+            while (stack.Count > 0)
+            {
+                string currentProc = stack.Pop();
+                ProcedureNode procNode = ProcedureList.FirstOrDefault(p => p.Name == currentProc);
+                if (procNode == null) continue;
 
-        public bool IsProcModifies(string procName, string variable) =>
-            GetProcModifies(procName).Any(m => m.Variable == variable);
+                List<int> stmtIds = new List<int>();
+                GatherStatementIds(procNode.Statements, stmtIds);
 
-        public bool IsProcUses(string procName, string variable) =>
-            GetProcUses(procName).Any(u => u.VariableName == variable);
+                foreach (int stmtId in stmtIds)
+                {
+                    foreach (var use in UseList)
+                    {
+                        if (use.StatementId == stmtId)
+                            usedVars.Add(use.VariableName);
+                    }
+                }
 
+                foreach (var call in CallList)
+                {
+                    if (call.CallerProc == currentProc && !visitedProcs.Contains(call.CalleeProc))
+                    {
+                        visitedProcs.Add(call.CalleeProc);
+                        stack.Push(call.CalleeProc);
+                    }
+                }
+            }
+
+            return usedVars.ToList();
+        }
         // Parent API (Zweryfikowane, 100% gwaracji nie daje)
         public List<Parent> GetParentList()
         {
@@ -358,74 +406,21 @@ namespace ProjectSPA_ATS.PKB
         }
 
         // Helpers
-        private IEnumerable<object> CollectProcModUses(string procName, bool wantMod)
+        private void GatherStatementIds(List<StatementNode> statements, List<int> result)
         {
-            if (!ProcedureList.Any(p => p.Name == procName))
-                return Enumerable.Empty<object>();
-
-            var visitedProcs = new HashSet<string>();
-            var result = new HashSet<object>();
-            var stack = new Stack<string>();
-            stack.Push(procName);
-
-            while (stack.Count > 0)
+            foreach (StatementNode stmt in statements)
             {
-                var cur = stack.Pop();
-                if (!visitedProcs.Add(cur)) continue;
-
-                var stmtIds = ProcedureList
-                              .First(p => p.Name == cur)
-                              .Statements
-                              .Select(s => s.StatementId)
-                              .ToHashSet();
-
-                if (wantMod)
+                result.Add(stmt.StatementId);
+                if (stmt is IfNode ifNode)
                 {
-                    foreach (var m in ModifyList.Where(m => stmtIds.Contains(m.Statement)))
-                        result.Add(m);
+                    GatherStatementIds(ifNode.ThenBody, result);
+                    GatherStatementIds(ifNode.ElseBody, result);
                 }
-                else
+                else if (stmt is WhileNode whileNode)
                 {
-                    foreach (var u in UseList.Where(u => stmtIds.Contains(u.StatementId)))
-                        result.Add(u);
+                    GatherStatementIds(whileNode.Body, result);
                 }
-
-                foreach (var callee in CallList.Where(c => c.CallerProc == cur)
-                                               .Select(c => c.CalleeProc))
-                    stack.Push(callee);
             }
-
-            return result;
-        }
-        private IEnumerable<string> CollectModUses(string proc, bool wantMod)
-        {
-            if (!ProcedureList.Any(p => p.Name == proc))
-                return Enumerable.Empty<string>();
-
-            var result = new HashSet<string>();
-            var visited = new HashSet<string>();
-            var stack = new Stack<string>();
-            stack.Push(proc);
-
-            while (stack.Count > 0)
-            {
-                var p = stack.Pop();
-                if (!visited.Add(p)) continue;
-
-                var stmtIds = ProcedureList.First(pr => pr.Name == p)
-                                           .Statements.Select(s => s.StatementId);
-
-                if (wantMod)
-                    result.UnionWith(ModifyList.Where(m => stmtIds.Contains(m.Statement))
-                                               .Select(m => m.Variable));
-                else
-                    result.UnionWith(UseList.Where(u => stmtIds.Contains(u.StatementId))
-                                               .Select(u => u.VariableName));
-                foreach (var callee in CallList.Where(c => c.CallerProc == p)
-                                               .Select(c => c.CalleeProc))
-                    stack.Push(callee);
-            }
-            return result;
         }
         private IEnumerable<string> DfsForward(string start, HashSet<string> visited)
         {
