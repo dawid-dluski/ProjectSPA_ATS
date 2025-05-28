@@ -7,24 +7,27 @@ namespace ProjectSPA_ATS.PKB
     sealed public class PKBService : IPBKService
     {
         private static readonly PKBService _instance = new PKBService();
-        private PKBService()
-        {
-            ModifyList = new List<Modify>();
-            UseList = new List<Use>();
-            FollowList = new List<Follow>();
-            ParentList = new List<Parent>();
-        }
-
         public static PKBService Instance => _instance;
 
-        private List<ProcedureNode> ProcedureList = new List<ProcedureNode>();
+        private List<ProcedureNode> ProcedureList;
         private List<AssignNode> VariableList;
         private List<Modify> ModifyList;
         private List<Use> UseList;
         private List<Follow> FollowList;
         private List<Parent> ParentList;
-        private List<Call> CallList = new();
-        // Procedure API
+        private List<Call> CallList;
+
+        private PKBService()
+        {
+            ProcedureList = new List<ProcedureNode>();
+            VariableList = new List<AssignNode>();
+            ModifyList = new List<Modify>();
+            UseList = new List<Use>();
+            FollowList = new List<Follow>();
+            ParentList = new List<Parent>();
+            CallList = new List<Call>();
+        }
+        // Design Extractor API
         public void AddProcedure(ProcedureNode proc)
         {
             if (ProcedureList.Any(x => x.Name == proc.Name))
@@ -34,6 +37,34 @@ namespace ProjectSPA_ATS.PKB
 
             ProcedureList.Add(proc);
         }
+        public void AddVariable(AssignNode v)
+        {
+            if (VariableList.Any(x => x.VarName == v.VarName))
+            {
+                throw new VariableNameConflictException();
+            }
+            VariableList.Add(v);
+        }
+        public void AddModify(Modify m)
+        {
+            ModifyList.Add(m);
+        }
+        public void AddCall(string caller, string callee)
+            => CallList.Add(new Call(caller, callee));
+        public void AddUses(Use u)
+        {
+            UseList.Add(u);
+        }
+        public void AddFollow(Follow f)
+        {
+            FollowList.Add(f);
+        }
+        public void AddParent(Parent p)
+        {
+            ParentList.Add(p);
+        }
+
+        // Procedure API
         public List<ProcedureNode> GetProcedureList()
         {
             return ProcedureList;
@@ -44,14 +75,6 @@ namespace ProjectSPA_ATS.PKB
         }
 
         // Variable API
-        public void AddVariable(AssignNode v)
-        {
-            if (VariableList.Any(x => x.VarName == v.VarName))
-            {
-                throw new VariableNameConflictException();
-            }
-            VariableList.Add(v);
-        }
         public List<AssignNode> GetVariableList()
         {
             return VariableList;
@@ -86,14 +109,7 @@ namespace ProjectSPA_ATS.PKB
         }
 
         // Modify API
-        public void AddModify(Modify m)
-        {
-            /*if (ModifyList.Any(x => x.ModifyVar == m.ModifyVar))
-            {
-                throw new ModifyNameConflictException();
-            }*/
-            ModifyList.Add(m);
-        }
+        
         public List<Modify> GetModifyList()
         {
             return ModifyList;
@@ -125,83 +141,8 @@ namespace ProjectSPA_ATS.PKB
                 .ToList();
         }
 
-        // Follow API
-        public void AddFollow(Follow f)
-        {
-            FollowList.Add(f);
-        }
-        public List<Follow> GetFollowList()
-        {
-            return FollowList;
-        }
-        public Follow GetFollowByIndex(int i)
-        {
-            if (i < 0 || i >= FollowList.Count)
-            {
-                throw new IndexOutOfRangeException("Index out of range");
-            }
-            return FollowList[i];
-        }
-        public int GetFollowListSize()
-        {
-            return FollowList.Count;
-        }
-        public List<int> GetFollowedStarBy(int stmtIndex)
-        {
-            var result = new List<int>();
-            var visited = new HashSet<int>();
-            var current = stmtIndex;
-
-            while (true)
-            {
-                var follow = FollowList.FirstOrDefault(f => f.PrecedingStmtId == current);
-                if (follow == null || visited.Contains(follow.FollowingStmtId))
-                    break;
-                result.Add(follow.FollowingStmtId);
-                visited.Add(follow.FollowingStmtId);
-                current = follow.FollowingStmtId;
-            }
-
-            return result;
-        }
-        public List<int> GetFollowedBy(int stmtIndex)
-        {
-            return FollowList
-                .Where(f => f.PrecedingStmtId == stmtIndex)
-                .Select(f => f.FollowingStmtId)
-                .ToList();
-        }
-        public List<int> GetFollowsStar(int stmtIndex)
-        {
-            var result = new List<int>();
-            var visited = new HashSet<int>();
-            var current = stmtIndex;
-
-            while (true)
-            {
-                var follow = FollowList.FirstOrDefault(f => f.FollowingStmtId == current);
-                if (follow == null || visited.Contains(follow.PrecedingStmtId))
-                    break;
-                result.Add(follow.PrecedingStmtId);
-                visited.Add(follow.PrecedingStmtId);
-                current = follow.PrecedingStmtId;
-            }
-
-            return result;
-        }
-        public List<int> GetFollows(int stmtIndex)
-        {
-            return FollowList
-                .Where(f => f.FollowingStmtId == stmtIndex)
-                .Select(f => f.PrecedingStmtId)
-                .ToList();
-        }
-
+        
         // Use API
-        public void AddUses(Use u)
-        {
-            UseList.Add(u);
-        }
         public List<Use> GetUseList()
         {
             return UseList;
@@ -232,12 +173,20 @@ namespace ProjectSPA_ATS.PKB
                 .Select(u => u.StatementId)
                 .ToList();
         }
+        // Modifies / Uses – procedury
+        public IEnumerable<Modify> GetProcModifies(string procName) =>
+            CollectProcModUses(procName, wantMod: true).Cast<Modify>();
 
-        // Parent API
-        public void AddParent(Parent p)
-        {
-            ParentList.Add(p);
-        }
+        public IEnumerable<Use> GetProcUses(string procName) =>
+            CollectProcModUses(procName, wantMod: false).Cast<Use>();
+
+        public bool IsProcModifies(string procName, string variable) =>
+            GetProcModifies(procName).Any(m => m.Variable == variable);
+
+        public bool IsProcUses(string procName, string variable) =>
+            GetProcUses(procName).Any(u => u.VariableName == variable);
+
+        // Parent API (Zweryfikowane, 100% gwaracji nie daje)
         public List<Parent> GetParentList()
         {
             return ParentList;
@@ -254,42 +203,24 @@ namespace ProjectSPA_ATS.PKB
         {
             return ParentList.Count;
         }
-        public List<int> GetParentedStarBy(int stmtIndex)
+        public List<int> GetParentedBy(int stmt)
+        {
+            var parent = ParentList.FirstOrDefault(p => p.ChildStmtId == stmt)?.ParentStmtId;
+            return parent is null ? new List<int>() : new List<int> { parent.Value };
+        }
+        public List<int> GetParentedStarBy(int stmt)
         {
             var result = new List<int>();
-            var queue = new Queue<int>();
-            var children = ParentList
-                .Where(p => p.ParentStmtId == stmtIndex)
-                .Select(p => p.ChildStmtId)
-                .ToList();
-
-            foreach (var child in children)
-                queue.Enqueue(child);
-
-            while (queue.Count > 0)
+            var cur = ParentList.FirstOrDefault(p => p.ChildStmtId == stmt)?.ParentStmtId;
+            while (cur is not null)
             {
-                var current = queue.Dequeue();
-                result.Add(current);
-
-                var nested = ParentList
-                    .Where(p => p.ParentStmtId == current)
-                    .Select(p => p.ChildStmtId);
-
-                foreach (var c in nested)
-                    queue.Enqueue(c);
+                result.Add(cur.Value);
+                cur = ParentList.FirstOrDefault(p => p.ChildStmtId == cur)?.ParentStmtId;
             }
-
             return result;
         }
-        public List<int> GetParentedBy(int stmtIndex)
-        {
-            return ParentList
-                .Where(p => p.ParentStmtId == stmtIndex)
-                .Select(p => p.ChildStmtId)
-                .ToList();
-        }
-
-        public bool IsParent(int p, int c) => ParentList.Any(x => x.ParentStmtId == p && x.ChildStmtId == c);
+        public bool IsParent(int p, int c) 
+            => ParentList.Any(x => x.ParentStmtId == p && x.ChildStmtId == c);
         public bool IsParentStar(int anc, int desc)
         {
             int? cur = desc;
@@ -304,12 +235,18 @@ namespace ProjectSPA_ATS.PKB
             ParentList.Where(p => p.ParentStmtId == parent).Select(p => p.ChildStmtId);
         public IEnumerable<int> GetDescendants(int parent)
         {
+            var visited = new HashSet<int>();
             var q = new Queue<int>(GetChildren(parent));
+
             while (q.Count > 0)
             {
                 var c = q.Dequeue();
-                yield return c;
-                foreach (var ch in GetChildren(c)) q.Enqueue(ch);
+                if (visited.Add(c))
+                {
+                    yield return c;
+                    foreach (var ch in GetChildren(c))
+                        q.Enqueue(ch);
+                }
             }
         }
         public int? GetParent(int child) =>
@@ -323,35 +260,92 @@ namespace ProjectSPA_ATS.PKB
                 cur = GetParent(cur.Value);
             }
         }
+        
+        // Follow API (Zweryfikowane, 100% gwaracji nie daje)
+        public List<Follow> GetFollowList()
+            => FollowList.Distinct().ToList();
+        public Follow GetFollowByIndex(int index)
+        {
+            if (index < 0 || index >= FollowList.Count)
+                throw new IndexOutOfRangeException($"Follow index {index} out of range.");
+            return FollowList[index];
+        }
+        public int GetFollowListSize()
+            => FollowList.Distinct().Count();
+        public List<int> GetFollowedBy(int stmt) =>
+            FollowList.Where(f => f.FollowingStmtId == stmt)
+                      .Select(f => f.PrecedingStmtId)
+                      .Distinct()
+                      .ToList();
+        public List<int> GetFollows(int stmt) =>
+            FollowList.Where(f => f.PrecedingStmtId == stmt)
+                      .Select(f => f.FollowingStmtId)
+                      .Distinct()
+                      .ToList();
+        public List<int> GetFollowedStarBy(int stmt)
+        {
+            var result = new HashSet<int>();
+            var stack = new Stack<int>(GetFollowedBy(stmt));
 
+            while (stack.Count > 0)
+            {
+                var prev = stack.Pop();
+                if (result.Add(prev))
+                    foreach (var p in GetFollowedBy(prev))
+                        stack.Push(p);
+            }
+            return result.ToList();
+        }
+        public List<int> GetFollowsStar(int stmt)
+        {
+            var result = new HashSet<int>();
+            var stack = new Stack<int>(GetFollows(stmt));
 
-
-
-
-
-
-        public void AddCall(string caller, string callee) => CallList.Add(new Call(caller, callee));
-        public List<Follow> GetFollowAll() => FollowList;
-        public List<Parent> GetParentAll() => ParentList;
-        public List<Use> GetUsesAll() => UseList;
-        public List<Modify> GetModifyAll() => ModifyList;
-
-        public IReadOnlyList<Call> GetCallsAll() => CallList;
-
-        /* ==== Modifies / Uses – procedury ==== */
-
-        public bool IsProcModifies(string proc, string var) => GetProcModifies(proc).Contains(var);
-        public bool IsProcUses(string proc, string var) => GetProcUses(proc).Contains(var);
-
-        public IEnumerable<string> GetProcModifies(string proc) =>
-            CollectModUses(proc, true);
-
-        public IEnumerable<string> GetProcUses(string proc) =>
-            CollectModUses(proc, false);
-
-        // Calls API (Zweryfikowane)
-        public bool IsCalls(string caller, string callee) =>
-            CallList.Any(c => c.CallerProc == caller && c.CalleeProc == callee);
+            while (stack.Count > 0)
+            {
+                var next = stack.Pop();
+                if (result.Add(next))
+                    foreach (var n in GetFollows(next))
+                        stack.Push(n);
+            }
+            return result.ToList();
+        }
+        public bool IsFollows(int s1, int s2) =>
+           FollowList.Any(f => f.PrecedingStmtId == s1 && f.FollowingStmtId == s2);
+        public int? GetImmediateFollower(int s1) =>
+            FollowList.FirstOrDefault(f => f.PrecedingStmtId == s1)?.FollowingStmtId;
+        public bool IsFollowsStar(int s1, int s2) => GetAllFollowers(s1).Contains(s2);
+        public IEnumerable<int> GetAllFollowers(int s1)
+        {
+            var cur = GetImmediateFollower(s1);
+            while (cur is not null)
+            {
+                yield return cur.Value;
+                cur = GetImmediateFollower(cur.Value);
+            }
+        }
+        public IEnumerable<int> GetAllPreceders(int s2)
+        {
+            var stack = new Stack<int>(FollowList.Where(f => f.FollowingStmtId == s2)
+                                                 .Select(f => f.PrecedingStmtId));
+            var seen = new HashSet<int>();
+            while (stack.Count > 0)
+            {
+                var prev = stack.Pop();
+                if (seen.Add(prev))
+                {
+                    yield return prev;
+                    foreach (var p in FollowList.Where(f => f.FollowingStmtId == prev)
+                                                .Select(f => f.PrecedingStmtId))
+                        stack.Push(p);
+                }
+            }
+        }
+        // Calls API (Zweryfikowane, 100% gwaracji nie daje)
+        public bool IsCalls(string caller, string callee) 
+            => CallList.Any(c => c.CallerProc == caller && c.CalleeProc == callee);
+        public bool IsCallsStar(string caller, string callee) 
+            => GetCallees(caller, true).Contains(callee);
         public IEnumerable<string> GetCallees(string caller, bool transitive = false)
         {
             if (!transitive) return CallList.Where(c => c.CallerProc == caller).Select(c => c.CalleeProc);
@@ -362,36 +356,76 @@ namespace ProjectSPA_ATS.PKB
             if (!transitive) return CallList.Where(c => c.CalleeProc == callee).Select(c => c.CallerProc);
             return DfsBackward(callee, new()).Where(p => p != callee);
         }
-        public bool IsCallsStar(string caller, string callee) =>
-            GetCallees(caller, true).Contains(callee);
 
         // Helpers
-        private IEnumerable<string> CollectModUses(string proc, bool wantMod)
+        private IEnumerable<object> CollectProcModUses(string procName, bool wantMod)
         {
-            var visited = new HashSet<string>();
-            var vars = new HashSet<string>();
+            if (!ProcedureList.Any(p => p.Name == procName))
+                return Enumerable.Empty<object>();
 
-            void DFS(string p)
+            var visitedProcs = new HashSet<string>();
+            var result = new HashSet<object>();
+            var stack = new Stack<string>();
+            stack.Push(procName);
+
+            while (stack.Count > 0)
             {
-                if (!visited.Add(p)) return;
+                var cur = stack.Pop();
+                if (!visitedProcs.Add(cur)) continue;
 
-                // bezpośrednie
-                var stmtIds = ProcedureList.First(pr => pr.Name == p)
-                                            .Statements.Select(s => s.StatementId);
+                var stmtIds = ProcedureList
+                              .First(p => p.Name == cur)
+                              .Statements
+                              .Select(s => s.StatementId)
+                              .ToHashSet();
 
                 if (wantMod)
-                    vars.UnionWith(ModifyList.Where(m => stmtIds.Contains(m.Statement))
-                                             .Select(m => m.Variable));
+                {
+                    foreach (var m in ModifyList.Where(m => stmtIds.Contains(m.Statement)))
+                        result.Add(m);
+                }
                 else
-                    vars.UnionWith(UseList.Where(u => stmtIds.Contains(u.StatementId))
-                                          .Select(u => u.VariableName));
+                {
+                    foreach (var u in UseList.Where(u => stmtIds.Contains(u.StatementId)))
+                        result.Add(u);
+                }
 
-                // kolejne procedury
-                foreach (var callee in GetCallees(p))
-                    DFS(callee);
+                foreach (var callee in CallList.Where(c => c.CallerProc == cur)
+                                               .Select(c => c.CalleeProc))
+                    stack.Push(callee);
             }
-            DFS(proc);
-            return vars;
+
+            return result;
+        }
+        private IEnumerable<string> CollectModUses(string proc, bool wantMod)
+        {
+            if (!ProcedureList.Any(p => p.Name == proc))
+                return Enumerable.Empty<string>();
+
+            var result = new HashSet<string>();
+            var visited = new HashSet<string>();
+            var stack = new Stack<string>();
+            stack.Push(proc);
+
+            while (stack.Count > 0)
+            {
+                var p = stack.Pop();
+                if (!visited.Add(p)) continue;
+
+                var stmtIds = ProcedureList.First(pr => pr.Name == p)
+                                           .Statements.Select(s => s.StatementId);
+
+                if (wantMod)
+                    result.UnionWith(ModifyList.Where(m => stmtIds.Contains(m.Statement))
+                                               .Select(m => m.Variable));
+                else
+                    result.UnionWith(UseList.Where(u => stmtIds.Contains(u.StatementId))
+                                               .Select(u => u.VariableName));
+                foreach (var callee in CallList.Where(c => c.CallerProc == p)
+                                               .Select(c => c.CalleeProc))
+                    stack.Push(callee);
+            }
+            return result;
         }
         private IEnumerable<string> DfsForward(string start, HashSet<string> visited)
         {
