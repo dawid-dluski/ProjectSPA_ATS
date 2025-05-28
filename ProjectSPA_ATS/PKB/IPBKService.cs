@@ -57,6 +57,13 @@ namespace ProjectSPA_ATS.PKB
         List<int> GetParentedStarBy(int stmtIndex);
         List<int> GetParentedBy(int stmtIndex);
 
+        bool IsParent(int p, int c);
+        bool IsParentStar(int anc, int desc);
+        IEnumerable<int> GetChildren(int parent);
+        IEnumerable<int> GetDescendants(int parent);
+        int? GetParent(int child);
+        IEnumerable<int> GetAncestors(int stmt);
+
         // Modifies/Uses API
         bool IsProcModifies(string proc, string var);
         bool IsProcUses(string proc, string var);

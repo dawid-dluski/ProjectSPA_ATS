@@ -12,6 +12,7 @@ namespace SimpleSPA
     {
         static void Main(string[] args)
         {
+            /// Config
             ConsoleEncodingHelper.SetIBM852Encoding();
 
             /// Services
@@ -19,7 +20,7 @@ namespace SimpleSPA
             ParserService _ParserService = ParserService.GetInstance(_pbkService);
             PQLService _PQLService = PQLService.GetInstance(_pbkService);
 
-            /// Loding simple code from source file
+            /// Loding simple code from source file if path doesn't exist as argument
             string simpleSourceCode = FileHelper.LoadFileContent(args);
 
             /// Parser

@@ -289,6 +289,47 @@ namespace ProjectSPA_ATS.PKB
                 .ToList();
         }
 
+        public bool IsParent(int p, int c) => ParentList.Any(x => x.ParentStmtId == p && x.ChildStmtId == c);
+        public bool IsParentStar(int anc, int desc)
+        {
+            int? cur = desc;
+            while (cur is not null)
+            {
+                cur = ParentList.FirstOrDefault(x => x.ChildStmtId == cur)?.ParentStmtId;
+                if (cur == anc) return true;
+            }
+            return false;
+        }
+        public IEnumerable<int> GetChildren(int parent) =>
+            ParentList.Where(p => p.ParentStmtId == parent).Select(p => p.ChildStmtId);
+        public IEnumerable<int> GetDescendants(int parent)
+        {
+            var q = new Queue<int>(GetChildren(parent));
+            while (q.Count > 0)
+            {
+                var c = q.Dequeue();
+                yield return c;
+                foreach (var ch in GetChildren(c)) q.Enqueue(ch);
+            }
+        }
+        public int? GetParent(int child) =>
+            ParentList.FirstOrDefault(p => p.ChildStmtId == child)?.ParentStmtId;
+        public IEnumerable<int> GetAncestors(int stmt)
+        {
+            var cur = GetParent(stmt);
+            while (cur is not null)
+            {
+                yield return cur.Value;
+                cur = GetParent(cur.Value);
+            }
+        }
+
+
+
+
+
+
+
         public void AddCall(string caller, string callee) => CallList.Add(new Call(caller, callee));
         public List<Follow> GetFollowAll() => FollowList;
         public List<Parent> GetParentAll() => ParentList;
@@ -308,25 +349,23 @@ namespace ProjectSPA_ATS.PKB
         public IEnumerable<string> GetProcUses(string proc) =>
             CollectModUses(proc, false);
 
-        /* ==== Calls ==== */
+        // Calls API (Zweryfikowane)
         public bool IsCalls(string caller, string callee) =>
             CallList.Any(c => c.CallerProc == caller && c.CalleeProc == callee);
-
         public IEnumerable<string> GetCallees(string caller, bool transitive = false)
         {
             if (!transitive) return CallList.Where(c => c.CallerProc == caller).Select(c => c.CalleeProc);
             return DfsForward(caller, new()).Where(p => p != caller);
         }
-
         public IEnumerable<string> GetCallers(string callee, bool transitive = false)
         {
             if (!transitive) return CallList.Where(c => c.CalleeProc == callee).Select(c => c.CallerProc);
             return DfsBackward(callee, new()).Where(p => p != callee);
         }
-
         public bool IsCallsStar(string caller, string callee) =>
             GetCallees(caller, true).Contains(callee);
 
+        // Helpers
         private IEnumerable<string> CollectModUses(string proc, bool wantMod)
         {
             var visited = new HashSet<string>();
@@ -354,7 +393,6 @@ namespace ProjectSPA_ATS.PKB
             DFS(proc);
             return vars;
         }
-
         private IEnumerable<string> DfsForward(string start, HashSet<string> visited)
         {
             if (!visited.Add(start)) yield break;
@@ -364,7 +402,6 @@ namespace ProjectSPA_ATS.PKB
                 foreach (var deep in DfsForward(callee, visited)) yield return deep;
             }
         }
-
         private IEnumerable<string> DfsBackward(string start, HashSet<string> visited)
         {
             if (!visited.Add(start)) yield break;
