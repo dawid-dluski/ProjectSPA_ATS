@@ -5,7 +5,7 @@ namespace ProjectSPA_ATS.PKB
 {
     public interface IPBKService
     {
-        // Design Extractor API
+        // Design Extractor API (Zweryfikowane, 100% gwaracji nie daje)
         void AddProcedure(ProcedureNode procedure);
         void AddVariable(AssignNode variable);
         void AddModify(Modify modify);
@@ -14,7 +14,7 @@ namespace ProjectSPA_ATS.PKB
         void AddFollow(Follow follow);
         void AddParent(Parent parent);
 
-        // Procedure API
+        // Procedure API (Zweryfikowane, 100% gwaracji nie daje)
         List<ProcedureNode> GetProcedureList();
         ProcedureNode GetProcedureByName(string name);
 
@@ -41,22 +41,26 @@ namespace ProjectSPA_ATS.PKB
         string GetUsed(int stmtIndex);
         List<int> GetUses(string varName);
 
-        // Follow API
-        List<Follow> GetFollowList();
-        Follow GetFollowByIndex(int index);
-        int GetFollowListSize();
-        List<int> GetFollowedStarBy(int stmtIndex);
-        List<int> GetFollowedBy(int stmtIndex);
-        List<int> GetFollowsStar(int stmtIndex);
-        List<int> GetFollows(int stmtIndex);
+        /* ========== Modifies / Uses – instrukcje ========== */
+        //bool IsModifies(int stmt, string var);
+        //bool IsUses(int stmt, string var);
+        //IEnumerable<string> GetModifiedVars(int stmt);
+        //IEnumerable<string> GetUsedVars(int stmt);
 
-        // Parent API
+        // Modifies / Uses – procedury
+        bool IsProcModifies(string proc, string var);
+        bool IsProcUses(string proc, string var);
+        //IEnumerable<string> GetProcModifies(string proc);
+        //IEnumerable<string> GetProcUses(string proc);
+        IEnumerable<Modify> GetProcModifies(string procName);
+        IEnumerable<Use> GetProcUses(string procName);
+
+        // Parent API (Zweryfikowane, 100% gwaracji nie daje)
         List<Parent> GetParentList();
         Parent GetParentByIndex(int index);
         int GetParentListSize();
         List<int> GetParentedStarBy(int stmtIndex);
         List<int> GetParentedBy(int stmtIndex);
-
         bool IsParent(int p, int c);
         bool IsParentStar(int anc, int desc);
         IEnumerable<int> GetChildren(int parent);
@@ -64,13 +68,21 @@ namespace ProjectSPA_ATS.PKB
         int? GetParent(int child);
         IEnumerable<int> GetAncestors(int stmt);
 
-        // Modifies/Uses API
-        bool IsProcModifies(string proc, string var);
-        bool IsProcUses(string proc, string var);
-        IEnumerable<string> GetProcModifies(string proc);
-        IEnumerable<string> GetProcUses(string proc);
+        // Follow API (Zweryfikowane, 100% gwaracji nie daje)
+        List<Follow> GetFollowList();
+        Follow GetFollowByIndex(int index);
+        int GetFollowListSize();
+        List<int> GetFollowedStarBy(int stmtIndex);
+        List<int> GetFollowedBy(int stmtIndex);
+        List<int> GetFollowsStar(int stmtIndex);
+        List<int> GetFollows(int stmtIndex);
+        bool IsFollows(int s1, int s2);
+        bool IsFollowsStar(int s1, int s2);
+        int? GetImmediateFollower(int s1);
+        IEnumerable<int> GetAllFollowers(int s1);
+        IEnumerable<int> GetAllPreceders(int s2);
 
-        // Calls API (Zweryfikowane)
+        // Calls API (Zweryfikowane, 100% gwaracji nie daje)
         bool IsCalls(string caller, string callee);
         bool IsCallsStar(string caller, string callee);
         IEnumerable<string> GetCallees(string caller, bool transitive = false);
