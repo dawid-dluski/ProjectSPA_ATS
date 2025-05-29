@@ -8,6 +8,7 @@ namespace ProjectSPA_ATS.PKB
         private readonly IPBKService _pkb;
         private int _stmtCounter;          // numeracja stmt#
         private string _currentProc;       // nazwa procedury – do relacji Calls
+        private static int _globalStmtCounter = 1;
 
         public DesignExtractor(IPBKService pkb) => _pkb = pkb;
 
@@ -25,7 +26,8 @@ namespace ProjectSPA_ATS.PKB
 
             foreach (var stmt in list)
             {
-                int id = _stmtCounter++;          // nowy stmt#
+                int id = _globalStmtCounter++;        
+                stmt.StatementId = id;
                 if (prevId.HasValue)
                     _pkb.AddFollow(new Follow(prevId.Value, id));
 

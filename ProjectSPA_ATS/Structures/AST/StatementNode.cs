@@ -8,6 +8,6 @@ namespace ProjectSPA_ATS.Structures.AST
 {
     public abstract class StatementNode : AstNode
     {
-        public int StatementId { get; }
+        public int StatementId { get; set; }
     }
 }
