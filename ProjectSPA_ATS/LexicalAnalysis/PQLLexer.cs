@@ -13,7 +13,7 @@ namespace ProjectSPA_ATS.LexicalAnalysis
 
         private static readonly HashSet<string> designEntities = new()
         {
-            "stmt", "assign", "while", "variable", "constant", "prog_line"
+            "stmt", "assign", "while", "variable", "constant", "prog_line", "procedure"
         };
 
         private static readonly Dictionary<string, TokenType> keywords = new(StringComparer.OrdinalIgnoreCase)

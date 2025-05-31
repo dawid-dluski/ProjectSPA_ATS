@@ -396,13 +396,13 @@ namespace ProjectSPA_ATS.PKB
             => GetCallees(caller, true).Contains(callee);
         public IEnumerable<string> GetCallees(string caller, bool transitive = false)
         {
-            if (!transitive) return CallList.Where(c => c.CallerProc == caller).Select(c => c.CalleeProc);
-            return DfsForward(caller, new()).Where(p => p != caller);
+            if (!transitive) return CallList.Where(c => c.CallerProc == caller).Select(c => c.CalleeProc).ToList();
+            return DfsForward(caller, new()).Where(p => p != caller).ToList();
         }
         public IEnumerable<string> GetCallers(string callee, bool transitive = false)
         {
-            if (!transitive) return CallList.Where(c => c.CalleeProc == callee).Select(c => c.CallerProc);
-            return DfsBackward(callee, new()).Where(p => p != callee);
+            if (!transitive) return CallList.Where(c => c.CalleeProc == callee).Select(c => c.CallerProc).ToList();
+            return DfsBackward(callee, new()).Where(p => p != callee).ToList();
         }
 
         // Helpers

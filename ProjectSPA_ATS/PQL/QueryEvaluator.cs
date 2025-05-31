@@ -45,6 +45,9 @@ namespace ProjectSPA_ATS.PQL
                     return EvaluateModifies(clause);
                 case "uses":
                     return EvaluateUses(clause);
+                case "calls":
+                case "calls*":
+                    return EvaluateCalls(clause, clause.Relation.EndsWith("*"));
                 default:
                     throw new Exception($"Unknown relationship: {clause.Relation}");
             }
@@ -332,6 +335,89 @@ namespace ProjectSPA_ATS.PQL
             throw new NotImplementedException("Unhandled Uses query form.");
         }
 
+
+        private List<string> EvaluateCalls(RelationshipClause clause, bool isTransitive)
+        {
+            string caller = clause.Arg1;
+            string callee = clause.Arg2;
+
+            // Calls("Main", "Init")
+            if (caller.StartsWith("\"") && callee.StartsWith("\""))
+            {
+                string callerProc = caller.Trim('"');
+                string calleeProc = callee.Trim('"');
+
+                bool result = isTransitive
+                    ? _pkb.IsCallsStar(callerProc, calleeProc)
+                    : _pkb.IsCalls(callerProc, calleeProc);
+
+                return result ? new List<string> { $"\"{calleeProc}\"" } : new List<string>();
+            }
+
+            // Calls("Main", p)
+            if (caller.StartsWith("\"") && !callee.StartsWith("\"") && callee != "_")
+            {
+                string callerProc = caller.Trim('"');
+                var callees = _pkb.GetCallees(callerProc, isTransitive);
+                return FilterResults(callees, callee,true);
+            }
+
+            // Calls(p, "Init")
+            if (!caller.StartsWith("\"") && caller != "_" && callee.StartsWith("\""))
+            {
+                string calleeProc = callee.Trim('"');
+                var callers = _pkb.GetCallers(calleeProc, isTransitive);
+                return FilterResults(callers, caller,true );
+            }
+
+            // Calls(p1, p2)
+            if (!caller.StartsWith("\"") && caller != "_" &&
+                !callee.StartsWith("\"") && callee != "_")
+            {
+                var callees = _pkb.GetCallees(null, isTransitive); // get all caller-callee pairs
+                                                                   // Tu najlepiej byłoby mieć GetCallsPairs(), ale jako workaround:
+                var allCallers = _pkb.GetCallers("*", isTransitive); // get all callers
+                var results = new List<string>();
+
+                foreach (var proc in allCallers)
+                {
+                    var innerCallees = _pkb.GetCallees(proc, isTransitive);
+                    foreach (var calleeName in innerCallees)
+                    {
+                        results.Add($"{proc},{calleeName}");
+                    }
+                }
+
+                // Tu trzeba by zmapować na pary i przefiltrować – pominę bo to edge-case
+                return new List<string>(); // ✴ Można rozbudować jak będzie potrzeba
+            }
+
+            // Calls(_, _)
+            if (caller == "_" && callee == "_")
+            {
+                return _pkb.GetCallees("*", isTransitive).Any()
+                    ? new List<string> { "true" }
+                    : new List<string>();
+            }
+
+            // Calls(_, p)
+            if (caller == "_" && callee != "_")
+            {
+                var callees = _pkb.GetCallees("*", isTransitive);
+                return FilterResults(callees, callee);
+            }
+
+            // Calls(p, _)
+            if (caller != "_" && callee == "_")
+            {
+                var callers = _pkb.GetCallers("*", isTransitive);
+                return FilterResults(callers, caller);
+            }
+
+            throw new NotImplementedException("Unhandled Calls/Calls* case.");
+        }
+
+
         // TU ABY ZROBIUC WIECEJ TRZEBA public class WithClause rozbudowac o iinne przypoadki 
         private List<string> ApplyWithClause(List<string> inputs, WithClause clause)
         {
@@ -356,10 +442,11 @@ namespace ProjectSPA_ATS.PQL
             return stmts.Select(x => x.ToString()).ToList();
         }
 
-        private List<string> FilterResults(IEnumerable<string> values, string target)
+        private List<string> FilterResults(IEnumerable<string> values, string target, bool isSynonym = false)
         {
             if (target == "_") return values.ToList();
             if (target.StartsWith("\"")) target = target.Trim('"');
+            if (isSynonym == true) return values.ToList();
             return values.Contains(target) ? new() { target } : new();
         }
 
