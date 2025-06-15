@@ -42,20 +42,26 @@ namespace ProjectSPA_ATS.Parser
         {
             var lexer = new Lexer(sourceCode);
             List<Token> tokens = lexer.GetTokens(sourceCode);
-            //Parsujemy listę tokenów, otrzymujemy obiekt AST
             initTokens(tokens);
 
+            var parsedProcedures = new List<ProcedureNode>();
 
             while (CurrentToken.Type != TokenType.EndOfFile)
             {
                 var procNode = ParseProcedure();
-                _PBKService.AddProcedure(procNode);
-
-                // extractor po każdej procedurze
-                new DesignExtractor(_PBKService).Extract(procNode);
+                _PBKService.AddProcedure(procNode);      
+                parsedProcedures.Add(procNode);          
             }
+
+            
+            foreach (var proc in parsedProcedures)
+            {
+                new DesignExtractor(_PBKService).Extract(proc);
+            }
+
             return true;
         }
+
 
         public ProcedureNode ParseProcedure()
         {

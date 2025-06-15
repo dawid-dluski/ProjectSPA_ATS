@@ -26,8 +26,36 @@ namespace ProjectSPA_ATS.PQL
                 candidates = ApplyWithClause(candidates, query.With);
             }
 
+            if (!candidates.Any()) return "none";
+
+            string? designEntity = query.Declarations
+                .FirstOrDefault(d => d.Synonyms.Contains(query.SelectSynonym))
+                ?.DesignEntity;
+
+            if (!string.IsNullOrEmpty(designEntity) && designEntity != "stmt" && designEntity !="variable")
+            {
+                var filtered = candidates
+                    .Where(c =>
+                    {
+                        if (!int.TryParse(c, out int stmtId)) return false;
+
+                        return designEntity switch
+                        {
+                            "assign" => _pkb.IsAssign(stmtId),
+                            "while" => _pkb.IsWhile(stmtId),
+                            "if" => _pkb.IsIf(stmtId),
+                            _ => true 
+                        };
+                    })
+                    .ToList();
+
+                if (!filtered.Any()) return "none";
+                return FormatResults(query.SelectSynonym, filtered);
+            }
+
             return FormatResults(query.SelectSynonym, candidates);
         }
+
 
         private List<string> EvaluateSuchThatClause(RelationshipClause clause, List<Declaration> declarations)
         {
@@ -149,7 +177,7 @@ namespace ProjectSPA_ATS.PQL
                 var parents = isTransitive
                     ? _pkb.GetAncestors(child.Value)
                     : _pkb.GetParentedBy(child.Value);
-                return FilterResults(parents, clause.Arg1);
+                 return FilterResults(parents, clause.Arg1,"while");
             }
 
             // DZIALA 
@@ -192,6 +220,7 @@ namespace ProjectSPA_ATS.PQL
                     .Distinct();
                 return FilterResults(candidates, target);
             }
+
 
             throw new NotImplementedException("Unhandled Parent/Parent* case.");
         }
@@ -435,12 +464,42 @@ namespace ProjectSPA_ATS.PQL
             return inputs;
         }
 
-        private List<string> FilterResults(IEnumerable<int> stmts, string target)
+        private List<string> FilterResults(IEnumerable<int> stmts, string target, string designEntity = null)
         {
-            if (target == "_") return stmts.Select(x => x.ToString()).ToList();
-            if (int.TryParse(target, out int val)) return stmts.Contains(val) ? new() { val.ToString() } : new();
-            return stmts.Select(x => x.ToString()).ToList();
+            if (target == "_")
+            {
+                return stmts
+                    .Where(id => MatchesDesignEntityIfNeeded(id, designEntity))
+                    .Select(x => x.ToString())
+                    .ToList();
+            }
+
+            if (int.TryParse(target, out int val))
+            {
+                return stmts.Contains(val) && MatchesDesignEntityIfNeeded(val, designEntity)
+                    ? new() { val.ToString() }
+                    : new();
+            }
+
+            return stmts
+                .Where(id => MatchesDesignEntityIfNeeded(id, designEntity))
+                .Select(x => x.ToString())
+                .ToList();
         }
+        private bool MatchesDesignEntityIfNeeded(int stmtId, string? designEntity)
+        {
+            if (string.IsNullOrEmpty(designEntity) || designEntity == "stmt")
+                return true;
+
+            return designEntity.ToLower() switch
+            {
+                "while" => _pkb.IsWhile(stmtId),
+                "assign" => _pkb.IsAssign(stmtId),
+                "if" => _pkb.IsIf(stmtId),
+                _ => true  // fallback: jeśli nie znamy typu, nie filtrujemy
+            };
+        }
+
 
         private List<string> FilterResults(IEnumerable<string> values, string target, bool isSynonym = false)
         {

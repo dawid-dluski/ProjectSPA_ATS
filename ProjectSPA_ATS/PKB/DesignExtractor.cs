@@ -1,4 +1,5 @@
-﻿using ProjectSPA_ATS.Structures;
+﻿using ProjectSPA_ATS.Helpers;
+using ProjectSPA_ATS.Structures;
 using ProjectSPA_ATS.Structures.AST;
 
 namespace ProjectSPA_ATS.PKB
@@ -84,7 +85,28 @@ namespace ProjectSPA_ATS.PKB
         /* --------------------  CALL  ------------------------------ */
         private void HandleCall(CallNode node, int id)
         {
-            _pkb.AddCall(_currentProc, node.Callee);          // Calls rel
+            _pkb.AddCall(_currentProc, node.Callee);
+
+            var visited = new HashSet<string>();
+            AddModifiesFromCallees(id, node.Callee, visited);
+        }
+
+
+
+        private void AddModifiesFromCallees(int callStmtId, string callee, HashSet<string> visited)
+        {
+            if (!visited.Add(callee)) return; // zapobiegamy cyklom
+
+            var proc = _pkb.GetProcedureByName(callee);
+            if (proc == null) return;
+
+            var assigns = Flatten(proc.Statements).OfType<AssignNode>();
+            foreach (var a in assigns)
+                _pkb.AddModify(new Modify(callStmtId, a.VarName));
+
+            var nestedCalls = Flatten(proc.Statements).OfType<CallNode>();
+            foreach (var nested in nestedCalls)
+                AddModifiesFromCallees(callStmtId, nested.Callee, visited);
         }
 
         private IEnumerable<string> CollectUsedVars(ExpressionNode expr)
@@ -99,5 +121,32 @@ namespace ProjectSPA_ATS.PKB
                     return Enumerable.Empty<string>();
             }
         }
+
+
+        // do pobrania zagniezdzonych assign w wywolanej procedurze
+        private IEnumerable<StatementNode> Flatten(IEnumerable<StatementNode> stmts)
+        {
+            foreach (var s in stmts)
+            {
+                yield return s;
+
+                switch (s)
+                {
+                    case WhileNode w:
+                        foreach (var inner in Flatten(w.Body))
+                            yield return inner;
+                        break;
+
+                    case IfNode i:
+                        foreach (var inner in Flatten(i.ThenBody))
+                            yield return inner;
+                        foreach (var inner in Flatten(i.ElseBody))
+                            yield return inner;
+                        break;
+                }
+            }
+        }
+
+
     }
 }

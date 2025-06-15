@@ -71,5 +71,11 @@ namespace ProjectSPA_ATS.PKB
         bool IsCallsStar(string caller, string callee);
         IEnumerable<string> GetCallees(string caller, bool transitive = false);
         IEnumerable<string> GetCallers(string callee, bool transitive = false);
+
+        // Statement Type Checks
+        bool IsWhile(int stmtId);
+        bool IsAssign(int stmtId);
+        bool IsIf(int stmtId);
+
     }
 }

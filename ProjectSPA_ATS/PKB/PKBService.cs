@@ -440,5 +440,42 @@ namespace ProjectSPA_ATS.PKB
                 foreach (var deep in DfsBackward(caller, visited)) yield return deep;
             }
         }
+        public bool IsWhile(int stmtId)
+        {
+            return ProcedureList.Any(proc => ContainsStatementType(proc.Statements, stmtId, typeof(WhileNode)));
+        }
+
+        public bool IsAssign(int stmtId)
+        {
+            return ProcedureList.Any(proc => ContainsStatementType(proc.Statements, stmtId, typeof(AssignNode)));
+        }
+
+        public bool IsIf(int stmtId)
+        {
+            return ProcedureList.Any(proc => ContainsStatementType(proc.Statements, stmtId, typeof(IfNode)));
+        }
+        private bool ContainsStatementType(IEnumerable<StatementNode> statements, int targetId, Type targetType)
+        {
+            foreach (var stmt in statements)
+            {
+                if (stmt.StatementId == targetId && stmt.GetType() == targetType)
+                    return true;
+
+                // Rekurencyjne sprawdzanie zagnieżdżeń
+                if (stmt is WhileNode whileNode)
+                {
+                    if (ContainsStatementType(whileNode.Body, targetId, targetType))
+                        return true;
+                }
+                else if (stmt is IfNode ifNode)
+                {
+                    if (ContainsStatementType(ifNode.ThenBody, targetId, targetType) ||
+                        ContainsStatementType(ifNode.ElseBody, targetId, targetType))
+                        return true;
+                }
+            }
+            return false;
+        }
+
     }
 }
